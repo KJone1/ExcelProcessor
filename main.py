@@ -10,9 +10,13 @@ class ExcelProcessor:
         self.category_column = "ענף"
         self.value_column = """סכום
 חיוב"""
-        self.name_column = """שם בית עסק"""
+        self.name_column = "שם בית עסק"
         self.df = None
         self.process_excel()
+
+    def _validate_dataframe(self):
+        if self.df is None:
+            raise ValueError("You must run process_excel() first.")
 
     def process_excel(self):
 
@@ -31,8 +35,7 @@ class ExcelProcessor:
         return self
 
     def calculate_category_sums(self):
-        if self.df is None:
-            raise ValueError("You must run process_excel() first.")
+        self._validate_dataframe()
 
         category_sums = (
             self.df.groupby(self.category_column)[self.value_column].sum().reset_index()
@@ -67,8 +70,7 @@ class ExcelProcessor:
         workbook.save(self.output_file)
 
     def write_to_excel(self):
-        if self.df is None:
-            raise ValueError("You must run process_excel() first.")
+        self._validate_dataframe()
 
         with pd.ExcelWriter(self.output_file) as writer:
             self.df.to_excel(writer, sheet_name="Processed Data", index=False)
@@ -82,8 +84,7 @@ class ExcelProcessor:
         self.style_excel_sheet()
 
     def fix_categories(self, name_list, new_category):
-        if self.df is None:
-            raise ValueError("You must run process_excel() first.")
+        self._validate_dataframe()
 
         self.df.loc[
             (self.df[self.name_column].isin(name_list))

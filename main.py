@@ -59,7 +59,7 @@ class ExcelProcessor:
                     try:
                         if len(str(cell.value)) > max_length:
                             max_length = len(str(cell.value))
-                    except:
+                    except Exception:
                         pass
                 adjusted_width = max_length + 2
                 sheet.column_dimensions[column].width = adjusted_width

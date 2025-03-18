@@ -12,7 +12,6 @@ class ExcelProcessor:
 חיוב"""
         self.name_column = "שם בית עסק"
         self.df = None
-        self.process_excel()
 
     def _validate_dataframe(self):
         if self.df is None:
@@ -43,6 +42,8 @@ class ExcelProcessor:
         return category_sums
 
     def top_5_amounts(self):
+        self._validate_dataframe()
+
         top_5 = self.df.nlargest(5, self.value_column)
         return top_5
 
@@ -101,5 +102,5 @@ names_to_change = ["BIT", "PAYBOX"]
 target_category = "תשלומים"
 
 excel = ExcelProcessor("data.xlsx")
-excel.fix_categories(names_to_change, target_category)
+excel.process_excel().fix_categories(names_to_change, target_category)
 excel.write_to_excel()

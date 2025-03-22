@@ -1,23 +1,24 @@
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
+from typing import Self
 
 
 class ExcelProcessor:
-    def __init__(self, input_file):
-        self.input_file = input_file
-        self.output_file = "out.xlsx"
-        self.category_column = "ענף"
-        self.value_column = """סכום
+    def __init__(self, input_file: str):
+        self.input_file: str = input_file
+        self.output_file: str = "out.xlsx"
+        self.category_column: str = "ענף"
+        self.value_column: str = """סכום
 חיוב"""
-        self.name_column = "שם בית עסק"
-        self.df = None
+        self.name_column: str = "שם בית עסק"
+        self.df: pd.DataFrame
 
     def _validate_dataframe(self):
         if self.df is None:
             raise ValueError("You must run process_excel() first.")
 
-    def process_excel(self):
+    def process_excel(self) -> Self:
 
         self.df = pd.read_excel(
             self.input_file,
@@ -33,15 +34,15 @@ class ExcelProcessor:
 
         return self
 
-    def calculate_category_sums(self):
+    def calculate_category_sums(self) -> pd.DataFrame:
         self._validate_dataframe()
 
-        category_sums = (
+        category_sums: pd.DataFrame = (
             self.df.groupby(self.category_column)[self.value_column].sum().reset_index()
         )
         return category_sums
 
-    def top_5_amounts(self):
+    def top_5_amounts(self) -> pd.DataFrame:
         self._validate_dataframe()
 
         top_5 = self.df.nlargest(5, self.value_column)
@@ -70,7 +71,7 @@ class ExcelProcessor:
 
         workbook.save(self.output_file)
 
-    def write_to_excel(self):
+    def write_to_excel(self) -> None:
         self._validate_dataframe()
 
         with pd.ExcelWriter(self.output_file) as writer:
@@ -84,7 +85,7 @@ class ExcelProcessor:
 
         self.style_excel_sheet()
 
-    def fix_categories(self, name_list, new_category):
+    def fix_categories(self, name_list: list[str], new_category: str) -> Self:
         self._validate_dataframe()
 
         self.df.loc[
@@ -101,6 +102,9 @@ class ExcelProcessor:
 names_to_change = ["BIT", "PAYBOX"]
 target_category = "תשלומים"
 
-excel = ExcelProcessor("data.xlsx")
-excel.process_excel().fix_categories(names_to_change, target_category)
-excel.write_to_excel()
+excel = (
+    ExcelProcessor("data.xlsx")
+    .process_excel()
+    .fix_categories(names_to_change, target_category)
+    .write_to_excel()
+)

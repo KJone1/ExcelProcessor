@@ -96,6 +96,15 @@ class ExcelProcessor:
             ),
             self.category_column,
         ] = new_category
+
+        self.df.loc[
+            (
+                self.df[self.category_column].isna()
+                | (self.df[self.category_column] == "nan")
+            ),
+            self.category_column,
+        ] = "Unknown"
+
         return self
 
 

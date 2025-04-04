@@ -87,20 +87,6 @@ class ExcelProcessor:
 
         self.style_excel_sheet()
 
-    def fix_categories(self, name_list: list[str], new_category: str) -> Self:
-        self._validate_dataframe()
-
-        self.df.loc[
-            (self.df[self.name_column].isin(name_list))
-            & (
-                self.df[self.category_column].isna()
-                | (self.df[self.category_column] == "nan")
-            ),
-            self.category_column,
-        ] = new_category
-
-        return self
-
     def fix_nan(self) -> Self:
 
         self.df.loc[
@@ -113,7 +99,7 @@ class ExcelProcessor:
 
         return self
 
-    def group_by_substring(self, substring: str, category: str) -> Self:
+    def fix_category(self, substring: str, category: str) -> Self:
 
         condition = self.df[self.name_column].str.contains(
             substring, case=False, na=False
@@ -123,16 +109,14 @@ class ExcelProcessor:
         return self
 
 
-names_to_change = ["BIT", "PAYBOX"]
-target_category = "תשלומים"
-
 excel = (
     ExcelProcessor("data.xlsx")
     .process_excel()
-    .fix_categories(names_to_change, target_category)
     .fix_nan()
-    .group_by_substring("google", "Recurring")
-    .group_by_substring("aliexpress", "Online")
+    .fix_category("google", "Subscriptions")
+    .fix_category("bit", "Payments")
+    .fix_category("paybox", "Payments")
+    .fix_category("aliexpress", "Online")
     .sort()
     .write_to_excel()
 )

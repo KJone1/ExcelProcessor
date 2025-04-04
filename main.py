@@ -30,8 +30,10 @@ class ExcelProcessor:
 
         self.df = self.df.dropna(subset=[self.value_column])
 
-        self.df = self.df.sort_values(by=[self.category_column])
+        return self.sort()
 
+    def sort(self) -> Self:
+        self.df = self.df.sort_values(by=[self.category_column])
         return self
 
     def calculate_category_sums(self) -> pd.DataFrame:
@@ -97,6 +99,10 @@ class ExcelProcessor:
             self.category_column,
         ] = new_category
 
+        return self
+
+    def fix_nan(self) -> Self:
+
         self.df.loc[
             (
                 self.df[self.category_column].isna()
@@ -107,6 +113,15 @@ class ExcelProcessor:
 
         return self
 
+    def group_by_substring(self, substring: str, category: str) -> Self:
+
+        condition = self.df[self.name_column].str.contains(
+            substring, case=False, na=False
+        )
+
+        self.df.loc[condition, self.category_column] = category
+        return self
+
 
 names_to_change = ["BIT", "PAYBOX"]
 target_category = "תשלומים"
@@ -115,5 +130,9 @@ excel = (
     ExcelProcessor("data.xlsx")
     .process_excel()
     .fix_categories(names_to_change, target_category)
+    .fix_nan()
+    .group_by_substring("google", "Recurring")
+    .group_by_substring("aliexpress", "Online")
+    .sort()
     .write_to_excel()
 )

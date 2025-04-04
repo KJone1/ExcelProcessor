@@ -33,6 +33,8 @@ class ExcelProcessor:
         return self.sort()
 
     def sort(self) -> Self:
+        self._validate_dataframe()
+
         self.df = self.df.sort_values(by=[self.category_column])
         return self
 
@@ -88,6 +90,7 @@ class ExcelProcessor:
         self.style_excel_sheet()
 
     def fix_nan(self) -> Self:
+        self._validate_dataframe()
 
         self.df.loc[
             (
@@ -100,6 +103,7 @@ class ExcelProcessor:
         return self
 
     def fix_category(self, substring: str, category: str) -> Self:
+        self._validate_dataframe()
 
         condition = self.df[self.name_column].str.contains(
             substring, case=False, na=False

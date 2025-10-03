@@ -122,6 +122,7 @@ if __name__ == "__main__":
         .fix_category("bit", "Payments")
         .fix_category("paybox", "Payments")
         .fix_category("aliexpress", "Online")
+        .fix_category("paypal", "Online")
         .sort()
         .write_to_excel()
     )

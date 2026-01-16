@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+for file in data.xlsx expense_report.md out.xlsx; do
+    [ -f "$file" ] && rm "$file"
+done
+
 DOWNLOADS_DIR="$HOME/Downloads"
 
 shopt -s nullglob

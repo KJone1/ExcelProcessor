@@ -119,6 +119,7 @@ if __name__ == "__main__":
         .process_excel()
         .fix_nan()
         .fix_category("google", "Subscriptions")
+        .fix_category("netflix", "Subscriptions")
         .fix_category("bit", "Payments")
         .fix_category("paybox", "Payments")
         .fix_category("aliexpress", "Online")

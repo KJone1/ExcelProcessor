@@ -4,13 +4,10 @@ import os
 
 INPUT_FILE = "out.xlsx"
 OUTPUT_FILE = "expense_report.md"
-# Use triple quotes to handle potential newline in column name
-VALUE_COL = """סכום
-חיוב"""
+VALUE_COL = """סכום\nחיוב"""
 CAT_COL = "ענף"
 NAME_COL = "שם בית עסק"
 
-# Categories List (Ordered for report)
 CATEGORIES = [
     "Entertainment and Fun",
     "Eating Out",
@@ -22,7 +19,10 @@ CATEGORIES = [
     "Appearance and Grooming",
     "Institutions",
     "Subscriptions",
-    "Online Shopping",
+    "Vacation and Travel",
+    "Education and Learning",
+    "Gifts and Charity",
+    "Electronics and Gadgets",
     "Reimbursable Expenses",
     "Rent and Utilities",
     "Misc and One-offs"
@@ -35,9 +35,6 @@ def map_category(row):
     
     name_lower = name.lower()
 
-    # 13. Rent and Utilities
-    # "PAYBOX 3000 rent" -> Paybox ~3000
-    # "PAYBOX 800-900 utilities" -> 800-900.
     if ("paybox" in name_lower):
         if 2900 <= amount <= 3100:
             return "Rent and Utilities"
@@ -47,67 +44,59 @@ def map_category(row):
     if orig_cat == 'אנרגיה':
         return "Transport and Car"
 
-    # 1. Entertainment and Fun
     if orig_cat == 'אירועים':
         return "Entertainment and Fun"
 
-    # 2. Eating Out
     if orig_cat == 'מסעדות':
         return "Eating Out"
 
-    # 3. Groceries
     if orig_cat in ['מזון ומשקאות', 'מזון מהיר']:
         return "Groceries"
 
-    # 4. Home and Decor
     if orig_cat == 'ריהוט ובית':
         return "Home and Decor"
     if "online home items" in name_lower: 
         return "Home and Decor"
 
-    # 5. Health and Cosmetics
     if orig_cat == 'רפואה ובריאות':
         return "Health and Cosmetics"
 
-    # 6. Transport and Car
     if orig_cat == 'רכב ותחבורה':
         return "Transport and Car"
-    # "transport מוסדות parking"
     if orig_cat == 'מוסדות' and any(x in name_lower for x in ['parking', 'חניון', 'pango', 'פנגו']):
         return "Transport and Car"
     if orig_cat == 'Unknown' and ('חניון' in name_lower or 'parking' in name_lower):
          return "Transport and Car"
 
-    # 7. Telecom
     if orig_cat == 'תקשורת ומחשבים':
         return "Telecom"
 
-    # 8. Appearance and Grooming
     if orig_cat in ['אופנה', 'טיפוח ויופי']:
         return "Appearance and Grooming"
     if any(x in name_lower for x in ['clothing', 'fashion', 'salon', 'barber', 'haircut']):
         return "Appearance and Grooming"
 
-    # 9. Institutions (Non-transport)
     if orig_cat == 'מוסדות':
         return "Institutions"
 
-    # 10. Subscriptions
     if orig_cat == 'Subscriptions':
         return "Subscriptions"
 
-    # 11. Online Shopping
-    if orig_cat == 'Online':
-        return "Online Shopping"
-    if any(x in name_lower for x in ['gadgets', 'electronics']):
-         return "Online Shopping"
+    if any(x in name_lower for x in ['hotel', 'airbnb', 'booking', 'flight', 'travel', 'el al', 'נתבג', 'חול']):
+        return "Vacation and Travel"
 
-    # 12. Reimbursable Expenses
+    if any(x in name_lower for x in ['course', 'udemy', 'coursera', 'book', 'steimatzky', 'סטימצקי']):
+        return "Education and Learning"
+
+    if any(x in name_lower for x in ['gift', 'donation', 'charity', 'מתנה', 'תרומה']):
+        return "Gifts and Charity"
+
+    if any(x in name_lower for x in ['gadget', 'electronic', 'ksp', 'ivory']):
+         return "Electronics and Gadgets"
+
     if "work expenses" in name_lower or "shared bills" in name_lower:
         return "Reimbursable Expenses"
 
-    # 14. Misc and One-offs (Default for others)
-    # "Payments" (BIT, etc) fall here if not Rent/Utils
     return "Misc and One-offs"
 
 def main():
@@ -117,28 +106,17 @@ def main():
 
     df = pd.read_excel(INPUT_FILE, sheet_name="Processed Data")
     
-    # Ensure columns exist
     req_cols = [NAME_COL, VALUE_COL, CAT_COL]
     for col in req_cols:
         if col not in df.columns:
             print(f"Error: Column '{col}' not found in {INPUT_FILE}")
-            # Try to print available columns for debug
-            print(f"Available columns: {df.columns.tolist()}")
             sys.exit(1)
 
-    # Map Categories
     df['MappedCategory'] = df.apply(map_category, axis=1)
 
-    # Calculate Totals
     total_spent = df[VALUE_COL].sum()
     total_transactions = len(df)
-    
-    # Validation
-    if abs(total_spent - df[VALUE_COL].sum()) > 0.01:
-        print("Validation Error: Total spent mismatch during processing.")
-        sys.exit(1)
         
-    # Prepare Report Data
     report_lines = []
     
     cat_summary = {}
@@ -169,10 +147,8 @@ def main():
             'transactions': trans_list
         }
         
-    # Sort categories by total desc
     sorted_categories = sorted(CATEGORIES, key=lambda x: cat_summary[x]['total'], reverse=True)
 
-    # --- Wolt Calculation ---
     wolt_df = df[df[NAME_COL].str.contains("wolt", case=False, na=False)]
     wolt_total = wolt_df[VALUE_COL].sum()
     wolt_count = len(wolt_df)
@@ -180,7 +156,6 @@ def main():
     eating_out_total = cat_summary["Eating Out"]['total']
     wolt_portion_eating_out = (wolt_total / eating_out_total * 100) if eating_out_total > 0 else 0.0
 
-    # --- Header ---
     report_lines.append("# Expense Report Summary")
     report_lines.append("")
     report_lines.append("## Overall Totals")
@@ -194,7 +169,6 @@ def main():
     report_lines.append(f"**TOTAL TRANSACTIONS:** {total_transactions}")
     report_lines.append("")
     
-    # --- Detail by Category ---
     for cat in sorted_categories:
         d = cat_summary[cat]
         report_lines.append(f"## {cat}")
@@ -204,7 +178,6 @@ def main():
         if d['count'] > 0:
             for name, price in d['transactions']:
                 display_name = name
-                # Rename Rent transaction if it matches criteria (approx 3000 and matches Paybox criteria used in mapping)
                 if cat == "Rent and Utilities" and 2900 <= price <= 3100 and "paybox" in name.lower():
                      display_name = "Rent"
                      
@@ -224,7 +197,6 @@ def main():
         report_lines.append(f"**Sum Formula:** `{sum_formula}`")
         report_lines.append("")
 
-    # --- Top Individual Expenses ---
     report_lines.append("## Top Individual Expenses")
     report_lines.append("")
     report_lines.append("> Excludes Rent and Utilities")
@@ -240,7 +212,6 @@ def main():
         
     report_lines.append("")
     
-    # --- Top Spending Categories ---
     report_lines.append("## Top Spending Categories")
     report_lines.append("")
     report_lines.append("> Excludes Rent and Utilities")
@@ -255,11 +226,9 @@ def main():
 
     report_lines.append("")
 
-    # --- Key Insights ---
     report_lines.append("## Key Insights")
     report_lines.append("")
     
-    # Wolt Section
     report_lines.append("### Wolt Analytics")
     report_lines.append(f"- **Total Spent on Wolt:** {wolt_total:.2f}₪")
     report_lines.append(f"- **Total Transactions:** {wolt_count}")

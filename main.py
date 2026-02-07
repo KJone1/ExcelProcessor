@@ -1,7 +1,8 @@
+from typing import Self
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
-from typing import Self
+from openpyxl.utils import get_column_letter
 
 
 class ExcelProcessor:
@@ -15,18 +16,23 @@ class ExcelProcessor:
         self.df: pd.DataFrame
 
     def _validate_dataframe(self):
-        if self.df is None:
+        if not hasattr(self, 'df') or self.df is None:
             raise ValueError("You must run process_excel() first.")
 
     def process_excel(self) -> Self:
-
         self.df = pd.read_excel(
             self.input_file,
             skiprows=3,
-            usecols=[self.category_column, self.value_column, self.name_column],
+            usecols=[
+                self.category_column,
+                self.value_column,
+                self.name_column
+            ],
         )
 
-        self.df[self.category_column] = self.df[self.category_column].astype(str)
+        self.df[self.category_column] = self.df[
+            self.category_column
+        ].astype(str)
 
         self.df = self.df.dropna(subset=[self.value_column])
 
@@ -42,7 +48,9 @@ class ExcelProcessor:
         self._validate_dataframe()
 
         category_sums: pd.DataFrame = (
-            self.df.groupby(self.category_column)[self.value_column].sum().reset_index()
+            self.df.groupby(self.category_column)[self.value_column]
+            .sum()
+            .reset_index()
         )
         return category_sums
 
@@ -59,19 +67,21 @@ class ExcelProcessor:
 
             for column_cells in sheet.columns:
                 max_length = 0
-                column = column_cells[0].column_letter
+                first_cell = column_cells[0]
+                if first_cell.column is None:
+                    continue
+                column = get_column_letter(first_cell.column)
                 for cell in column_cells:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except Exception:
-                        pass
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
                 adjusted_width = max_length + 2
                 sheet.column_dimensions[column].width = adjusted_width
 
             for row in sheet:
                 for cell in row:
-                    cell.alignment = Alignment(horizontal="center", vertical="center")
+                    cell.alignment = Alignment(
+                        horizontal="center", vertical="center"
+                    )
 
         workbook.save(self.output_file)
 
@@ -114,16 +124,17 @@ class ExcelProcessor:
 
 
 if __name__ == "__main__":
-    excel = (
+    processor = (
         ExcelProcessor("data.xlsx")
         .process_excel()
         .fix_nan()
         .fix_category("google", "Subscriptions")
         .fix_category("netflix", "Subscriptions")
+        .fix_category("apple.com/bill", "Subscriptions")
         .fix_category("bit", "Payments")
         .fix_category("paybox", "Payments")
         .fix_category("aliexpress", "Online")
         .fix_category("paypal", "Online")
         .sort()
-        .write_to_excel()
     )
+    processor.write_to_excel()

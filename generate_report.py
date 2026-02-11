@@ -50,8 +50,17 @@ def map_category(row: pd.Series) -> str:
         if 800 <= amount <= 900:
             return "Rent and Utilities"
 
-    if "online home items" in name_lower:
+    if any(x in name_lower for x in ['online home items', 'booom']):
         return "Home and Decor"
+
+    if any(x in name_lower for x in ['poalim wonder', 'מש - קר']):
+        return "Eating Out"
+
+    if any(
+        x in name_lower
+        for x in ['course', 'udemy', 'coursera', 'book', 'books', 'steimatzky', 'סטימצקי', 'ספרים', 'מכון טכנולוגי', 'h.i.t', 'מכון אקדמי טכנולוגי חולון', 'מעונות חולון', 'חניון מעונות']
+    ) or re.search(r'\bhit\b', name_lower):
+        return "Education and Learning"
 
     if any(x in name_lower for x in ['parking', 'חניון', 'pango', 'פנגו', 'רב-פס']):
         return "Transport and Car"
@@ -70,22 +79,19 @@ def map_category(row: pd.Series) -> str:
 
     if any(
         x in name_lower
-        for x in ['course', 'udemy', 'coursera', 'book', 'steimatzky', 'סטימצקי', 'מכון טכנולוגי', 'h.i.t']
-    ) or re.search(r'\bhit\b', name_lower):
-        return "Education and Learning"
-
-    if any(
-        x in name_lower
         for x in ['gift', 'donation', 'charity', 'מתנה', 'תרומה']
     ):
         return "Gifts and Charity"
+
+    if any(x in name_lower for x in ['bitwarden', 'addy.io']):
+        return "Subscriptions"
 
     if "work expenses" in name_lower or "shared bills" in name_lower:
         return "Reimbursable Expenses"
 
     if any(
         x in name_lower
-        for x in ['gadget', 'electronic', 'ksp', 'ivory','קי.אס.פי.','קיי.אס.פי','פי.אס.קיי','פי.אס.קי']
+        for x in ['gadget', 'electronic', 'ksp', 'ivory','קי.אס.פי.','קיי.אס.פי','פי.אס.קיי','פי.אס.קי', 'k s p']
     ):
         return "Electronics and Gadgets"
 
@@ -94,6 +100,9 @@ def map_category(row: pd.Series) -> str:
 
     if "עיריית" in name_lower:
         return "Government & Municipal"
+
+    if "iherb" in name_lower:
+        return "Health and Cosmetics"
 
     if orig_cat == 'אנרגיה':
         return "Transport and Car"

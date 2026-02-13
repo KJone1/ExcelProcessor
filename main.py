@@ -10,6 +10,7 @@ class ExcelProcessor:
         self.input_file: str = input_file
         self.output_file: str = "out.xlsx"
         self.category_column: str = "ענף"
+        self.date_column: str = "תאריך\nעסקה"
         self.value_column: str = """סכום
 חיוב"""
         self.name_column: str = "שם בית עסק"
@@ -24,6 +25,7 @@ class ExcelProcessor:
             self.input_file,
             skiprows=3,
             usecols=[
+                self.date_column,
                 self.category_column,
                 self.value_column,
                 self.name_column

@@ -32,6 +32,8 @@ echo "Copied $(basename "$target_file") to data.xlsx."
 
 uv sync
 uv run main.py
-uv run generate_report.py
+uv run generate_csv.py
+uv run import_transactions.py
 
-echo "Report generated successfully"
+echo "Transactions imported successfully"
+

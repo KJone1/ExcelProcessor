@@ -1,7 +1,7 @@
 *.xlsx
 expense_report.md
 *.pdf
-
+*.csv
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

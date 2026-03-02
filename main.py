@@ -1,4 +1,5 @@
 from typing import Self
+
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
@@ -17,24 +18,22 @@ class ExcelProcessor:
         self.df: pd.DataFrame
 
     def _validate_dataframe(self):
-        if not hasattr(self, 'df') or self.df is None:
+        if not hasattr(self, "df") or self.df is None:
             raise ValueError("You must run process_excel() first.")
 
     def process_excel(self) -> Self:
         self.df = pd.read_excel(
             self.input_file,
-            skiprows=3,
+            skiprows=4,
             usecols=[
                 self.date_column,
                 self.category_column,
                 self.value_column,
-                self.name_column
+                self.name_column,
             ],
         )
 
-        self.df[self.category_column] = self.df[
-            self.category_column
-        ].astype(str)
+        self.df[self.category_column] = self.df[self.category_column].astype(str)
 
         self.df = self.df.dropna(subset=[self.value_column])
 
@@ -50,9 +49,7 @@ class ExcelProcessor:
         self._validate_dataframe()
 
         category_sums: pd.DataFrame = (
-            self.df.groupby(self.category_column)[self.value_column]
-            .sum()
-            .reset_index()
+            self.df.groupby(self.category_column)[self.value_column].sum().reset_index()
         )
         return category_sums
 
@@ -81,9 +78,7 @@ class ExcelProcessor:
 
             for row in sheet:
                 for cell in row:
-                    cell.alignment = Alignment(
-                        horizontal="center", vertical="center"
-                    )
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
 
         workbook.save(self.output_file)
 

@@ -24,7 +24,7 @@ class ExcelProcessor:
     def process_excel(self) -> Self:
         self.df = pd.read_excel(
             self.input_file,
-            skiprows=4,
+            skiprows=3,
             usecols=[
                 self.date_column,
                 self.category_column,

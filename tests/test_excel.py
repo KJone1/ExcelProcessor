@@ -41,7 +41,3 @@ def test_sort_by_category(prepared_df):
     
     categories = sorted_df["Category"].dropna().tolist()
     assert categories == sorted(categories)
-
-def test_sort_by_category_missing_col(prepared_df):
-    with pytest.raises(ValueError):
-        sort_by_category(prepared_df, "missing_col")

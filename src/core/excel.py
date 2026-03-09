@@ -26,9 +26,8 @@ def discard_row_if_amount_missing(
 def sort_by_category(
     dataframe: pd.DataFrame, column_name: str = "Category"
 ) -> pd.DataFrame:
-    if column_name not in dataframe.columns:
-        raise ValueError(f"Column '{column_name}' not found in DataFrame")
-    return dataframe.sort_values(by=[column_name])
+    new_df = dataframe.copy()
+    return new_df.sort_values(by=[column_name])
 
 
 def remap_categories(

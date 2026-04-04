@@ -50,10 +50,7 @@ else
 fi
 
 uv sync
-uv run main.py
-uv run generate_csv.py
-uv run import_transactions.py
-[ -f payslip.pdf ] && uv run extract_payslip.py
+uv run python -m src.main
 
-echo "Transactions imported successfully"
+echo "Pipeline executed successfully"
 

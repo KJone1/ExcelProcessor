@@ -57,3 +57,10 @@ def print_transactions_report(csv_path: str) -> None:
 def print_error(message: str) -> None:
     console = Console()
     console.print(f"[bold red]Error:[/bold red] {message}")
+
+
+@safe
+def confirm_import() -> bool:
+    from rich.prompt import Confirm
+
+    return Confirm.ask("Do you want to import this to Actual?")

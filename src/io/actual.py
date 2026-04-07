@@ -1,4 +1,6 @@
-from datetime import date
+import csv
+import os
+from datetime import date, datetime
 from typing import Any
 
 from actual import Actual
@@ -10,49 +12,162 @@ from actual.queries import (
     get_categories,
     get_transactions,
 )
+from dotenv import load_dotenv
 from returns.result import safe
 
 from src.models.actual import ActualConfig, Transaction
+from src.models.pdf import PayslipData
 
 
 @safe
-def import_transactions_to_actual(
-    config: ActualConfig, transactions: list[Transaction]
-) -> None:
-    with Actual(base_url=config.server_url, password=config.password) as actual:
-        actual.set_file(config.budget_id)
+def import_payslip_to_actual(payslip_data: PayslipData) -> None:
+    load_dotenv()
+
+    server_url = os.getenv("ACTUAL_SERVER_URL")
+    password = os.getenv("ACTUAL_PASSWORD")
+    budget_id = os.getenv("ACTUAL_BUDGET_ID")
+
+    if not server_url or not password or not budget_id:
+        print("Error: Missing configuration in .env")
+        raise ValueError("Missing Actual Budget configuration")
+
+    with Actual(base_url=server_url, password=password) as actual:
+        print(f"Connecting to budget: {budget_id}")
+        actual.set_file(budget_id)
         actual.download_budget()
         session = actual.session
 
         accounts = get_accounts(session)
+        account = next((a for a in accounts if "Poalim" in a.name), None)
+        if not account:
+            account = accounts[0]
+        print(f"Importing to account: {account.name}")
+
+        categories = get_categories(session)
+        category = next((c for c in categories if c.name == "Income"), None)
+        if not category:
+            print("Error: 'Income' category not found.")
+            raise ValueError("'Income' category not found")
+
+        # The transaction date is already calculated as the 1st of the next month in extract_payslip_date
+        trans_date = payslip_data.date
+
+        # The salary is for the previous month
+        if trans_date.month == 1:
+            salary_month = 12
+            salary_year = trans_date.year - 1
+        else:
+            salary_month = trans_date.month - 1
+            salary_year = trans_date.year
+            
+        salary_date = date(salary_year, salary_month, 1)
+        month_name = salary_date.strftime("%B")
+        description = f"Salary for {month_name}"
+
+        create_transaction(
+            session,
+            date=trans_date,
+            account=account,
+            payee="Salary",
+            category=category,
+            amount=payslip_data.net_to_bank,
+            notes=description,
+        )
+
+        print("Committing changes...")
+        actual.commit()
+        actual.sync()
+        print("Done.")
+
+
+@safe
+def import_transactions_to_actual(csv_path: str) -> None:
+    load_dotenv()
+
+    server_url = os.getenv("ACTUAL_SERVER_URL")
+    password = os.getenv("ACTUAL_PASSWORD")
+    budget_id = os.getenv("ACTUAL_BUDGET_ID")
+
+    if not server_url or not password or not budget_id:
+        print("Error: Missing configuration in .env")
+        print(
+            "Please ensure ACTUAL_SERVER_URL, ACTUAL_PASSWORD, and ACTUAL_BUDGET_ID are set."
+        )
+        raise ValueError("Missing Actual Budget configuration")
+
+    if not os.path.exists(csv_path):
+        print(f"Error: {csv_path} not found. Please run generate_csv.py first.")
+        raise FileNotFoundError(f"{csv_path} not found")
+
+    with Actual(base_url=server_url, password=password) as actual:
+        print(f"Connecting to budget: {budget_id}")
+        actual.set_file(budget_id)
+        actual.download_budget()
+        session = actual.session
+
+        # Get Account
+        accounts = get_accounts(session)
+
+        # TODO: Allow selecting account via env var or arg? Defaulting to first one.
+        account = accounts[0]
+        print(f"Importing to account: {account.name}")
+
+        # Get Categories map
         categories = get_categories(session)
         cat_map = {c.name: c for c in categories}
 
         affected_months: set[int] = set()
 
-        for trans in transactions:
-            # Default to first account if not found
-            account = next(
-                (a for a in accounts if a.name == trans.account), accounts[0]
-            )
-            category = cat_map.get(trans.category) if trans.category else None
+        # Read CSV
+        print(f"Reading {csv_path}...")
+        count = 0
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                try:
+                    date_str = row.get("Date")
+                    payee = row.get("Payee")
+                    amount_str = row.get("Amount")
+                    category_name = row.get("Category")
 
-            create_transaction(
-                session,
-                date=trans.date,
-                account=account,
-                payee=trans.payee,
-                category=category,
-                amount=trans.amount,
-                notes=trans.notes,
-            )
-            affected_months.add(int(trans.date.strftime("%Y%m")))
+                    if not date_str or not amount_str:
+                        continue
 
-        # Zero out balances for affected months
-        _zero_out_balances(session, categories, sorted(list(affected_months)))
+                    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    amount_float = float(amount_str)
 
-        actual.commit()
-        actual.sync()
+                    # Invert sign: CSV (Positive=Expense) -> Actual (Negative=Expense)
+                    actual_amount = amount_float * -1
+
+                    category = cat_map.get(category_name) if category_name else None
+
+                    create_transaction(
+                        session,
+                        date=date_obj,
+                        account=account,
+                        payee=payee,
+                        category=category,
+                        amount=actual_amount,
+                        notes="Imported via script",
+                    )
+
+                    affected_months.add(int(date_obj.strftime("%Y%m")))
+                    count += 1
+                except Exception as e:
+                    print(f"Error processing row {row}: {e}")
+
+        if count > 0:
+            print(f"Imported {count} transactions. Adjusting budgets...")
+
+            # Zero out balances for all affected months
+            _zero_out_balances(session, categories, sorted(list(affected_months)))
+
+            print("Committing changes...")
+            actual.commit()
+            actual.sync()
+            print("Done.")
+        else:
+            print("No transactions found to import.")
 
 
 def _zero_out_balances(session: Any, categories: Any, months_to_fix: list[int]) -> None:
@@ -77,6 +192,8 @@ def _zero_out_balances(session: Any, categories: Any, months_to_fix: list[int]) 
         year = month_int // 100
         month = month_int % 100
         month_date = date(year, month, 1)
+
+        print(f"Zeroing out balances for: {month_date.strftime('%Y-%m')}")
 
         for cat_obj in categories:
             if cat_obj.is_income or cat_obj.tombstone:

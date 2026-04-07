@@ -2,7 +2,7 @@ init:
     uv sync
 
 clean:
-    rm -f *.xlsx actual.csv payslip.pdf
+    rm -f *.xlsx actual.csv *.pdf
 
 lint:
     uv run basedpyright .

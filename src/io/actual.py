@@ -15,7 +15,6 @@ from actual.queries import (
 from dotenv import load_dotenv
 from returns.result import safe
 
-from src.models.actual import ActualConfig, Transaction
 from src.models.pdf import PayslipData
 
 
@@ -27,9 +26,7 @@ def import_payslip_to_actual(payslip_data: PayslipData) -> None:
     password = os.getenv("ACTUAL_PASSWORD")
     budget_id = os.getenv("ACTUAL_BUDGET_ID")
 
-    if not server_url or not password or not budget_id:
-        print("Error: Missing configuration in .env")
-        raise ValueError("Missing Actual Budget configuration")
+    assert server_url and password and budget_id, "Missing Actual Budget configuration"
 
     with Actual(base_url=server_url, password=password) as actual:
         print(f"Connecting to budget: {budget_id}")
@@ -38,16 +35,11 @@ def import_payslip_to_actual(payslip_data: PayslipData) -> None:
         session = actual.session
 
         accounts = get_accounts(session)
-        account = next((a for a in accounts if "Poalim" in a.name), None)
-        if not account:
-            account = accounts[0]
+        account = next(a for a in accounts if a.name and "Poalim" in a.name)
         print(f"Importing to account: {account.name}")
 
         categories = get_categories(session)
-        category = next((c for c in categories if c.name == "Income"), None)
-        if not category:
-            print("Error: 'Income' category not found.")
-            raise ValueError("'Income' category not found")
+        category = next(c for c in categories if c.name == "Income")
 
         # The transaction date is already calculated as the 1st of the next month in extract_payslip_date
         trans_date = payslip_data.date
@@ -88,16 +80,7 @@ def import_transactions_to_actual(csv_path: str) -> None:
     password = os.getenv("ACTUAL_PASSWORD")
     budget_id = os.getenv("ACTUAL_BUDGET_ID")
 
-    if not server_url or not password or not budget_id:
-        print("Error: Missing configuration in .env")
-        print(
-            "Please ensure ACTUAL_SERVER_URL, ACTUAL_PASSWORD, and ACTUAL_BUDGET_ID are set."
-        )
-        raise ValueError("Missing Actual Budget configuration")
-
-    if not os.path.exists(csv_path):
-        print(f"Error: {csv_path} not found. Please run generate_csv.py first.")
-        raise FileNotFoundError(f"{csv_path} not found")
+    assert server_url and password and budget_id, "Missing Actual Budget configuration"
 
     with Actual(base_url=server_url, password=password) as actual:
         print(f"Connecting to budget: {budget_id}")
@@ -107,9 +90,7 @@ def import_transactions_to_actual(csv_path: str) -> None:
 
         # Get Account
         accounts = get_accounts(session)
-
-        # TODO: Allow selecting account via env var or arg? Defaulting to first one.
-        account = accounts[0]
+        account = next(a for a in accounts if a.name and "Poalim" in a.name)
         print(f"Importing to account: {account.name}")
 
         # Get Categories map
@@ -177,16 +158,17 @@ def _zero_out_balances(session: Any, categories: Any, months_to_fix: list[int]) 
     # Map budget data: (month_int, cat_id) -> (budgeted, carryover)
     budget_data: dict[tuple[int, str], tuple[int, int]] = {}
     for b in budgets:
-        budget_data[(b.month, b.category_id)] = (b.amount, b.carryover)
+        if b.month is not None and b.category_id is not None:
+            budget_data[(b.month, b.category_id)] = (b.amount or 0, b.carryover or 0)
 
     # Map spent amounts: (month_int, cat_id) -> amount
     spent_map: dict[tuple[int, str], int] = {}
     for t in transactions:
-        if t.tombstone or not t.category_id:
+        if t.tombstone or not t.category_id or t.date is None:
             continue
-        month_int = int(str(t.date)[:6])
+        month_int = int(str(t.date).replace("-", "")[:6])
         key = (month_int, t.category_id)
-        spent_map[key] = spent_map.get(key, 0) + t.amount
+        spent_map[key] = spent_map.get(key, 0) + (t.amount or 0)
 
     for month_int in months_to_fix:
         year = month_int // 100

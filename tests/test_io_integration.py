@@ -14,8 +14,7 @@ def test_read_golden_excel():
         
     assert os.path.exists(GOLDEN_FILE), "Golden file missing"
     
-    result = read_excel(GOLDEN_FILE, skiprows=3)
-    df = result.unwrap()
+    df = read_excel(GOLDEN_FILE, skiprows=3)
     
     df = discard_row_if_amount_missing(df, VALUE_COL)
     

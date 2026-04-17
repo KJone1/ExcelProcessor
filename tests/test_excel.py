@@ -17,7 +17,7 @@ def raw_df():
         os.makedirs(os.path.dirname(GOLDEN_FILE), exist_ok=True)
         generate_mock_excel(GOLDEN_FILE)
     
-    return read_excel(GOLDEN_FILE).unwrap()
+    return read_excel(GOLDEN_FILE)
 
 @pytest.fixture(scope="module")
 def prepared_df(raw_df):

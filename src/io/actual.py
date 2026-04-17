@@ -13,12 +13,10 @@ from actual.queries import (
     get_transactions,
 )
 from dotenv import load_dotenv
-from returns.result import safe
 
 from src.models.pdf import PayslipData
 
 
-@safe
 def import_payslip_to_actual(payslip_data: PayslipData) -> None:
     load_dotenv()
 
@@ -72,7 +70,6 @@ def import_payslip_to_actual(payslip_data: PayslipData) -> None:
         print("Done.")
 
 
-@safe
 def import_transactions_to_actual(csv_path: str) -> None:
     load_dotenv()
 

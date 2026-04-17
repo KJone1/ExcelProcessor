@@ -1,22 +1,18 @@
 import pandas as pd
 import pypdf
-from returns.result import safe
 
 from src.core.pdf import extract_gross_pay, extract_net_pay, extract_payslip_date
 from src.models.pdf import PayslipData
 
 
-@safe
 def read_excel(file_path: str, skiprows: int = 3) -> pd.DataFrame:
     return pd.read_excel(file_path, skiprows=skiprows)
 
 
-@safe
 def write_csv(dataframe: pd.DataFrame, output_path: str) -> None:
     dataframe.to_csv(output_path, index=False)
 
 
-@safe
 def decrypt_pdf(pdf_path: str, password: str) -> None:
     reader = pypdf.PdfReader(pdf_path)
     if reader.is_encrypted:
@@ -28,7 +24,6 @@ def decrypt_pdf(pdf_path: str, password: str) -> None:
             writer.write(f)
 
 
-@safe
 def extract_payslip_data(pdf_path: str) -> PayslipData:
     reader = pypdf.PdfReader(pdf_path)
     text = ""

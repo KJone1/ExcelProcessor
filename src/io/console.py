@@ -1,11 +1,9 @@
-from returns.result import safe
 from rich.console import Console
 from rich.table import Table
 
 from src.models.pdf import PayslipData
 
 
-@safe
 def print_payslip_report(data: PayslipData) -> None:
     console = Console()
 
@@ -19,7 +17,6 @@ def print_payslip_report(data: PayslipData) -> None:
     console.print("-" * 30)
 
 
-@safe
 def print_transactions_report(csv_path: str) -> None:
     import pandas as pd
 
@@ -53,7 +50,6 @@ def print_transactions_report(csv_path: str) -> None:
     console.print("-" * 30)
 
 
-@safe
 def print_error(message: str) -> None:
     console = Console()
     console.print(f"[bold red]Error:[/bold red] {message}")

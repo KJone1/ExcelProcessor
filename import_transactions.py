@@ -143,7 +143,7 @@ def main():
             # Zero out balances for all affected months
             zero_out_balances(session, categories, sorted(list(affected_months)))
             
-            print(f"Committing changes...")
+            print("Committing changes...")
             actual.commit()
             actual.sync()
             print("Done.")

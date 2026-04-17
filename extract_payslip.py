@@ -83,13 +83,16 @@ def extract_payslip_data(pdf_path):
                     return re.findall(r'\d{1,3}(?:,\d{3})*(?:\.\d+)?', s)
 
                 nums = get_numbers(line)
-                if nums: candidates.extend(nums)
+                if nums:
+                    candidates.extend(nums)
                 if i > 0:
                     nums_prev = get_numbers(lines[i-1])
-                    if nums_prev: candidates.extend(nums_prev)
+                    if nums_prev:
+                        candidates.extend(nums_prev)
                 if i < len(lines) - 1:
                     nums_next = get_numbers(lines[i+1])
-                    if nums_next: candidates.extend(nums_next)
+                    if nums_next:
+                        candidates.extend(nums_next)
                 
                 if candidates:
                     try:
@@ -112,13 +115,16 @@ def extract_payslip_data(pdf_path):
                         return re.findall(r'\d{1,3}(?:,\d{3})*(?:\.\d+)?', s)
 
                     nums = get_numbers(line)
-                    if nums: candidates.extend(nums)
+                    if nums:
+                        candidates.extend(nums)
                     if i > 0:
                         nums_prev = get_numbers(lines[i-1])
-                        if nums_prev: candidates.extend(nums_prev)
+                        if nums_prev:
+                            candidates.extend(nums_prev)
                     if i < len(lines) - 1:
                         nums_next = get_numbers(lines[i+1])
-                        if nums_next: candidates.extend(nums_next)
+                        if nums_next:
+                            candidates.extend(nums_next)
 
                     if candidates:
                         try:

@@ -13,9 +13,9 @@ NAME_COL = "שם בית עסק"
 
 def map_category(row: pd.Series) -> str:
     cat_val = row[CAT_COL]
-    orig_cat = str(cat_val) if not pd.isna(cat_val) is True else "Unknown"
+    orig_cat = str(cat_val) if pd.isna(cat_val) is not True else "Unknown"
     name_val = row[NAME_COL]
-    name = str(name_val) if not pd.isna(name_val) is True else ""
+    name = str(name_val) if pd.isna(name_val) is not True else ""
     amount = float(row[VALUE_COL])
 
     name_lower = name.lower()

@@ -25,7 +25,7 @@ def check_rent(row: pd.Series) -> Optional[str]:
 def check_health(row: pd.Series) -> Optional[str]:
     name = row["Payee"].lower()
     cat = row["Category"]
-    keywords = ["iherb", "רפואה ובריאות"]
+    keywords = ["iherb", "רפואה ובריאות", "קוסמטיקה"]
     if any(x in name for x in keywords) or cat in keywords:
         return "Health & Cosmetics"
     return None
@@ -93,6 +93,7 @@ def check_vacation(row: pd.Series) -> Optional[str]:
     name = row["Payee"].lower()
     keywords = [
         "hotel",
+        "הוטל",
         "airbnb",
         "booking",
         "flight",

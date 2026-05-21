@@ -1,0 +1,13 @@
+{
+  "include": ["src", "explore"],
+  "exclude": ["deprecated", "tests"],
+  "reportAny": "none",
+  "reportExplicitAny": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownLambdaType": "none",
+  "reportMissingTypeStubs": "none",
+  "reportMissingParameterType": "none"
+}

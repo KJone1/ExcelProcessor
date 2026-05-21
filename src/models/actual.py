@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+
 
 @dataclass(frozen=True)
 class ActualConfig:
@@ -8,11 +8,12 @@ class ActualConfig:
     password: str
     budget_id: str
 
+
 @dataclass(frozen=True)
 class Transaction:
     date: date
     payee: str
     amount: float
-    category: Optional[str] = None
-    account: Optional[str] = None
+    category: str | None = None
+    account: str | None = None
     notes: str = ""

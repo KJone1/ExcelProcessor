@@ -1,9 +1,8 @@
 import re
-from typing import Optional
 import pandas as pd
 
 
-def check_reimbursable(row: pd.Series) -> Optional[str]:
+def check_reimbursable(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     amount = row["Amount"]
     keywords = ["work expenses", "shared bills"]
@@ -12,7 +11,7 @@ def check_reimbursable(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_rent(row: pd.Series) -> Optional[str]:
+def check_rent(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     amount = row["Amount"]
     keywords = ["paybox"]
@@ -22,7 +21,7 @@ def check_rent(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_health(row: pd.Series) -> Optional[str]:
+def check_health(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["iherb", "רפואה ובריאות", "קוסמטיקה"]
@@ -31,7 +30,7 @@ def check_health(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_home_decor(row: pd.Series) -> Optional[str]:
+def check_home_decor(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["online home items", "booom", "ריהוט ובית"]
@@ -40,7 +39,7 @@ def check_home_decor(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_eating_out(row: pd.Series) -> Optional[str]:
+def check_eating_out(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["poalim wonder", "מש - קר", "wolt", "מסעדות", "מזון מהיר"]
@@ -49,7 +48,7 @@ def check_eating_out(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_education(row: pd.Series) -> Optional[str]:
+def check_education(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     keywords = [
         "course",
@@ -71,7 +70,7 @@ def check_education(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_transport(row: pd.Series) -> Optional[str]:
+def check_transport(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["parking", "חניון", "pango", "פנגו", "רב-פס", "אנרגיה", "רכב ותחבורה"]
@@ -80,7 +79,7 @@ def check_transport(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_appearance(row: pd.Series) -> Optional[str]:
+def check_appearance(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["clothing", "fashion", "salon", "barber", "haircut", "אופנה", "טיוח ויופי"]
@@ -89,7 +88,7 @@ def check_appearance(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_vacation(row: pd.Series) -> Optional[str]:
+def check_vacation(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     keywords = [
         "hotel",
@@ -108,7 +107,7 @@ def check_vacation(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_gifts(row: pd.Series) -> Optional[str]:
+def check_gifts(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     keywords = ["gift", "donation", "charity", "מתנה", "תרומה"]
     if any(x in name for x in keywords):
@@ -116,7 +115,7 @@ def check_gifts(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_subscriptions(row: pd.Series) -> Optional[str]:
+def check_subscriptions(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["bitwarden", "addy.io", "google", "netflix", "apple.com/bill", "Subscriptions"]
@@ -125,7 +124,7 @@ def check_subscriptions(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_electronics(row: pd.Series) -> Optional[str]:
+def check_electronics(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     keywords = [
         "gadget",
@@ -144,7 +143,7 @@ def check_electronics(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_groceries(row: pd.Series) -> Optional[str]:
+def check_groceries(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["קרמה +", "מזון ומשקאות", "מזון מהיר"]
@@ -153,7 +152,7 @@ def check_groceries(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_government(row: pd.Series) -> Optional[str]:
+def check_government(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["עיריית", "מוסדות"]
@@ -162,7 +161,7 @@ def check_government(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_telecom(row: pd.Series) -> Optional[str]:
+def check_telecom(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["תקשורת ומחשבים"]
@@ -171,7 +170,7 @@ def check_telecom(row: pd.Series) -> Optional[str]:
     return None
 
 
-def check_entertainment(row: pd.Series) -> Optional[str]:
+def check_entertainment(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = ["אירועים"]
@@ -185,10 +184,10 @@ def map_category(row: pd.Series) -> str:
         func for name, func in globals().items()
         if name.startswith("check_") and callable(func)
     ]
-    
+
     for check in checks:
         result = check(row)
-        if result is not None:
+        if isinstance(result, str):
             return result
-            
+
     return "Misc & One-offs"

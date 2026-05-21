@@ -16,12 +16,12 @@ def write_csv(dataframe: pd.DataFrame, output_path: str) -> None:
 def decrypt_pdf(pdf_path: str, password: str) -> None:
     reader = pypdf.PdfReader(pdf_path)
     if reader.is_encrypted:
-        reader.decrypt(password)
+        _ = reader.decrypt(password)
         writer = pypdf.PdfWriter()
         for page in reader.pages:
-            writer.add_page(page)
+            _ = writer.add_page(page)
         with open(pdf_path, "wb") as f:
-            writer.write(f)
+            _ = writer.write(f)
 
 
 def extract_payslip_data(pdf_path: str) -> PayslipData:

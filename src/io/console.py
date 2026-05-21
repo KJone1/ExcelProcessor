@@ -48,8 +48,3 @@ def print_transactions_report(csv_path: str) -> None:
     console.print(f"Total Transactions: [bold cyan]{len(df)}[/bold cyan]")
     console.print(f"Total Sum: [bold green]{total_sum:,.2f}₪[/bold green]")
     console.print("-" * 30)
-
-
-def print_error(message: str) -> None:
-    console = Console()
-    console.print(f"[bold red]Error:[/bold red] {message}")

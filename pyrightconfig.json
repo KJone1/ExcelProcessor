@@ -1,5 +1,5 @@
 {
-  "include": ["src", "explore"],
+  "include": ["src", "scripts"],
   "exclude": ["deprecated", "tests"],
   "reportAny": "none",
   "reportExplicitAny": "none",

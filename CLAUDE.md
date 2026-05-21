@@ -44,9 +44,10 @@ The project is designed as a functional data transformation pipeline, adhering t
 ### Key Commands
 Refer to the `justfile` and `run.sh` for the primary commands used to build, run, and test the project.
 
-### Schema and Account Exploration
-To inspect your live Actual Budget setup (active accounts, balances, category groups, and categories) to assist with mapping rules:
-- **Run exploration**: `just explore`
+### Standalone Utility Scripts
+To inspect your live Actual Budget setup or adjust category budgets:
+- **Run budget schema exploration**: `just explore`
+- **Zero out category balances**: `just zero-out`
 
 ---
 

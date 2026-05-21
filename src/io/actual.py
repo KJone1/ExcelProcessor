@@ -1,16 +1,12 @@
 import csv
 import os
 from datetime import date, datetime
-from typing import Any
 
 from actual import Actual
 from actual.queries import (
-    create_budget,
     create_transaction,
     get_accounts,
-    get_budgets,
     get_categories,
-    get_transactions,
 )
 from dotenv import load_dotenv
 
@@ -134,10 +130,7 @@ def import_transactions_to_actual(csv_path: str) -> None:
                 count += 1
 
         if count > 0:
-            print(f"Imported {count} transactions. Adjusting budgets...")
-
-            # Zero out balances for all affected months
-            _zero_out_balances(session, categories, sorted(list(affected_months)))
+            print(f"Imported {count} transactions.")
 
             print("Committing changes...")
             actual.commit()
@@ -145,45 +138,3 @@ def import_transactions_to_actual(csv_path: str) -> None:
             print("Done.")
         else:
             print("No transactions found to import.")
-
-
-def _zero_out_balances(session: Any, categories: Any, months_to_fix: list[int]) -> None:
-    budgets = get_budgets(session)
-    transactions = get_transactions(session)
-
-    # Map budget data: (month_int, cat_id) -> (budgeted, carryover)
-    budget_data: dict[tuple[int, str], tuple[int, int]] = {}
-    for b in budgets:
-        if b.month is not None and b.category_id is not None:
-            budget_data[(b.month, b.category_id)] = (b.amount or 0, b.carryover or 0)
-
-    # Map spent amounts: (month_int, cat_id) -> amount
-    spent_map: dict[tuple[int, str], int] = {}
-    for t in transactions:
-        if t.tombstone or not t.category_id or t.date is None:
-            continue
-        month_int = int(str(t.date).replace("-", "")[:6])
-        key = (month_int, t.category_id)
-        spent_map[key] = spent_map.get(key, 0) + (t.amount or 0)
-
-    for month_int in months_to_fix:
-        year = month_int // 100
-        month = month_int % 100
-        month_date = date(year, month, 1)
-
-        print(f"Zeroing out balances for: {month_date.strftime('%Y-%m')}")
-
-        for cat_obj in categories:
-            if cat_obj.is_income or cat_obj.tombstone:
-                continue
-
-            _, carryover = budget_data.get((month_int, cat_obj.id), (0, 0))
-            spent = spent_map.get((month_int, cat_obj.id), 0)
-
-            # Budgeted = -(Carryover + Spent)
-            new_budgeted_cents = -(carryover + spent)
-            new_budgeted_units = new_budgeted_cents / 100.0
-
-            current_budgeted_cents, _ = budget_data.get((month_int, cat_obj.id), (0, 0))
-            if new_budgeted_cents != current_budgeted_cents:
-                _ = create_budget(session, month_date, cat_obj, new_budgeted_units)

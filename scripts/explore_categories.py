@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from actual import Actual
 from actual.queries import get_category_groups
 
-sys.path.append(os.getcwd())
 _ = load_dotenv()
 
 server_url = os.getenv("ACTUAL_SERVER_URL")

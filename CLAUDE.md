@@ -45,9 +45,9 @@ The project is designed as a functional data transformation pipeline, adhering t
 Refer to the `justfile` and `run.sh` for the primary commands used to build, run, and test the project.
 
 ### Standalone Utility Scripts
-To inspect your live Actual Budget setup or adjust category budgets:
-- **Run budget schema exploration**: `just explore`
-- **Zero out category balances**: `just zero-out`
+These isolated helper scripts are separate from the main pipeline and leverage PEP 723 inline metadata to run in auto-provisioned environments via `uv run <script>` (or via `just` commands):
+- **Run budget schema exploration**: `just explore` (runs `scripts/explore_accounts.py` and `scripts/explore_categories.py`)
+- **Zero out category balances**: `just zero-out` (runs `scripts/zero_out_balances.py`)
 
 ---
 

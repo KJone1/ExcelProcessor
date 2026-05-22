@@ -19,8 +19,7 @@ from actual.queries import (
     get_transactions,
 )
 
-sys.path.append(os.getcwd())
-_loaded = load_dotenv()
+_ = load_dotenv()
 
 server_url = os.getenv("ACTUAL_SERVER_URL")
 password = os.getenv("ACTUAL_PASSWORD")

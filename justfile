@@ -1,6 +1,9 @@
 init:
     uv sync
 
+run:
+    ./run.sh
+
 clean:
     rm -f *.xlsx actual.csv *.pdf
 

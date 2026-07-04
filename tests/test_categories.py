@@ -3,20 +3,7 @@ from src.core.categories import (
     map_category, 
     check_reimbursable, 
     check_rent, 
-    check_eating_out,
-    check_education,
-    check_vacation,
-    check_home_decor,
-    check_transport,
-    check_appearance,
-    check_gifts,
-    check_subscriptions,
-    check_electronics,
-    check_groceries,
-    check_government,
-    check_health,
-    check_telecom,
-    check_entertainment
+    check_keywords
 )
 
 def create_row(payee="", amount=0.0, category="Unknown"):
@@ -35,91 +22,96 @@ def test_check_rent():
     assert check_rent(create_row("other", 3000.0)) is None
 
 def test_check_home_decor():
-    assert check_home_decor(create_row("online home items")) == "Home & Decor"
-    assert check_home_decor(create_row("booom")) == "Home & Decor"
-    assert check_home_decor(create_row("random", category="ריהוט ובית")) == "Home & Decor"
-    assert check_home_decor(create_row("random")) is None
+    assert check_keywords(create_row("online home items"), "Home & Decor") == "Home & Decor"
+    assert check_keywords(create_row("booom"), "Home & Decor") == "Home & Decor"
+    assert check_keywords(create_row("random", category="ריהוט ובית"), "Home & Decor") == "Home & Decor"
+    assert check_keywords(create_row("random"), "Home & Decor") is None
 
 def test_check_eating_out():
-    assert check_eating_out(create_row("poalim wonder")) == "Eating out"
-    assert check_eating_out(create_row("מש - קר")) == "Eating out"
-    assert check_eating_out(create_row("wolt")) == "Eating out"
-    assert check_eating_out(create_row("random", category="מסעדות")) == "Eating out"
-    assert check_eating_out(create_row("random", category="מזון מהיר")) == "Eating out"
-    assert check_eating_out(create_row("random")) is None
+    assert check_keywords(create_row("poalim wonder"), "Eating out") == "Eating out"
+    assert check_keywords(create_row("מש - קר"), "Eating out") == "Eating out"
+    assert check_keywords(create_row("wolt"), "Eating out") == "Eating out"
+    assert check_keywords(create_row("random", category="מסעדות"), "Eating out") == "Eating out"
+    assert check_keywords(create_row("random", category="מזון מהיר"), "Eating out") == "Eating out"
+    assert check_keywords(create_row("random"), "Eating out") is None
 
 def test_check_education():
-    assert check_education(create_row("udemy course")) == "Education & Learning"
-    assert check_education(create_row("hit")) == "Education & Learning"
-    assert check_education(create_row("סטימצקי")) == "Education & Learning"
-    assert check_education(create_row("מכון אקדמי טכנולוגי חולון")) == "Education & Learning"
-    assert check_education(create_row("random")) is None
+    assert check_keywords(create_row("udemy course"), "Education & Learning") == "Education & Learning"
+    assert check_keywords(create_row("hit"), "Education & Learning") == "Education & Learning"
+    assert check_keywords(create_row("סטימצקי"), "Education & Learning") == "Education & Learning"
+    assert check_keywords(create_row("מכון אקדמי טכנולוגי חולון"), "Education & Learning") == "Education & Learning"
+    assert check_keywords(create_row("white hit"), "Education & Learning") is None
+    assert check_keywords(create_row("random"), "Education & Learning") is None
 
 def test_check_transport():
-    assert check_transport(create_row("pango")) == "Transport & Car"
-    assert check_transport(create_row("פנגו")) == "Transport & Car"
-    assert check_transport(create_row("רב-פס")) == "Transport & Car"
-    assert check_transport(create_row("random", category="אנרגיה")) == "Transport & Car"
-    assert check_transport(create_row("random", category="רכב ותחבורה")) == "Transport & Car"
-    assert check_transport(create_row("random")) is None
+    assert check_keywords(create_row("pango"), "Transport & Car") == "Transport & Car"
+    assert check_keywords(create_row("פנגו"), "Transport & Car") == "Transport & Car"
+    assert check_keywords(create_row("רב-פס"), "Transport & Car") == "Transport & Car"
+    assert check_keywords(create_row("random", category="אנרגיה"), "Transport & Car") == "Transport & Car"
+    assert check_keywords(create_row("random", category="רכב ותחבורה"), "Transport & Car") == "Transport & Car"
+    assert check_keywords(create_row("random"), "Transport & Car") is None
 
 def test_check_appearance():
-    assert check_appearance(create_row("fashion store")) == "Appearance & Grooming"
-    assert check_appearance(create_row("barber")) == "Appearance & Grooming"
-    assert check_appearance(create_row("random", category="אופנה")) == "Appearance & Grooming"
-    assert check_appearance(create_row("random", category="טיוח ויופי")) == "Appearance & Grooming"
-    assert check_appearance(create_row("random")) is None
+    assert check_keywords(create_row("fashion store"), "Appearance & Grooming") == "Appearance & Grooming"
+    assert check_keywords(create_row("barber"), "Appearance & Grooming") == "Appearance & Grooming"
+    assert check_keywords(create_row("random", category="אופנה"), "Appearance & Grooming") == "Appearance & Grooming"
+    assert check_keywords(create_row("random", category="טיפוח ויופי"), "Appearance & Grooming") == "Appearance & Grooming"
+    assert check_keywords(create_row("random"), "Appearance & Grooming") is None
 
 def test_check_vacation():
-    assert check_vacation(create_row("hotel booking")) == "Vacation & Travel"
-    assert check_vacation(create_row("airbnb")) == "Vacation & Travel"
-    assert check_vacation(create_row("חו\"ל")) == "Vacation & Travel"
-    assert check_vacation(create_row("חול")) == "Vacation & Travel"
-    assert check_vacation(create_row("random")) is None
+    assert check_keywords(create_row("hotel booking"), "Vacation & Travel") == "Vacation & Travel"
+    assert check_keywords(create_row("airbnb"), "Vacation & Travel") == "Vacation & Travel"
+    assert check_keywords(create_row("חו\"ל"), "Vacation & Travel") == "Vacation & Travel"
+    assert check_keywords(create_row("חול"), "Vacation & Travel") == "Vacation & Travel"
+    assert check_keywords(create_row("random", category="תיירות"), "Vacation & Travel") == "Vacation & Travel"
+    assert check_keywords(create_row("חולון"), "Vacation & Travel") is None
+    assert check_keywords(create_row("random"), "Vacation & Travel") is None
 
 def test_check_gifts():
-    assert check_gifts(create_row("gift card")) == "Gifts & Charity"
-    assert check_gifts(create_row("מתנה")) == "Gifts & Charity"
-    assert check_gifts(create_row("תרומה")) == "Gifts & Charity"
-    assert check_gifts(create_row("random")) is None
+    assert check_keywords(create_row("gift card"), "Gifts & Charity") == "Gifts & Charity"
+    assert check_keywords(create_row("מתנה"), "Gifts & Charity") == "Gifts & Charity"
+    assert check_keywords(create_row("תרומה"), "Gifts & Charity") == "Gifts & Charity"
+    assert check_keywords(create_row("random"), "Gifts & Charity") is None
 
 def test_check_subscriptions():
-    assert check_subscriptions(create_row("google")) == "Subscriptions"
-    assert check_subscriptions(create_row("netflix")) == "Subscriptions"
-    assert check_subscriptions(create_row("apple.com/bill")) == "Subscriptions"
-    assert check_subscriptions(create_row("bitwarden")) == "Subscriptions"
-    assert check_subscriptions(create_row("random", category="Subscriptions")) == "Subscriptions"
-    assert check_subscriptions(create_row("random")) is None
+    assert check_keywords(create_row("google"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("netflix"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("apple.com/bill"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("bitwarden"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("random", category="Subscriptions"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("random"), "Subscriptions") is None
 
 def test_check_electronics():
-    assert check_electronics(create_row("gadget")) == "Electronics & Gadgets"
-    assert check_electronics(create_row("ksp")) == "Electronics & Gadgets"
-    assert check_electronics(create_row("קי.אס.פי.")) == "Electronics & Gadgets"
-    assert check_electronics(create_row("random")) is None
+    assert check_keywords(create_row("gadget"), "Electronics & Gadgets") == "Electronics & Gadgets"
+    assert check_keywords(create_row("ksp"), "Electronics & Gadgets") == "Electronics & Gadgets"
+    assert check_keywords(create_row("קי.אס.פי."), "Electronics & Gadgets") == "Electronics & Gadgets"
+    assert check_keywords(create_row("random"), "Electronics & Gadgets") is None
 
 def test_check_groceries():
-    assert check_groceries(create_row("קרמה +")) == "Groceries"
-    assert check_groceries(create_row("random", category="מזון ומשקאות")) == "Groceries"
-    assert check_groceries(create_row("random", category="מזון מהיר")) == "Groceries"
-    assert check_groceries(create_row("random")) is None
+    assert check_keywords(create_row("קרמה +"), "Groceries") == "Groceries"
+    assert check_keywords(create_row("random", category="מזון ומשקאות"), "Groceries") == "Groceries"
+    assert check_keywords(create_row("random", category="מזון מהיר"), "Groceries") == "Groceries"
+    assert check_keywords(create_row("random"), "Groceries") is None
 
 def test_check_government():
-    assert check_government(create_row("עיריית")) == "Government & Municipal"
-    assert check_government(create_row("random", category="מוסדות")) == "Government & Municipal"
-    assert check_government(create_row("random")) is None
+    assert check_keywords(create_row("עיריית"), "Government & Municipal") == "Government & Municipal"
+    assert check_keywords(create_row("random", category="מוסדות"), "Government & Municipal") == "Government & Municipal"
+    assert check_keywords(create_row("random"), "Government & Municipal") is None
 
 def test_check_health():
-    assert check_health(create_row("iherb")) == "Health & Cosmetics"
-    assert check_health(create_row("random", category="רפואה ובריאות")) == "Health & Cosmetics"
-    assert check_health(create_row("random")) is None
+    assert check_keywords(create_row("iherb"), "Health & Cosmetics") == "Health & Cosmetics"
+    assert check_keywords(create_row("random", category="רפואה ובריאות"), "Health & Cosmetics") == "Health & Cosmetics"
+    assert check_keywords(create_row("random"), "Health & Cosmetics") is None
 
 def test_check_telecom():
-    assert check_telecom(create_row("random", category="תקשורת ומחשבים")) == "Telecom"
-    assert check_telecom(create_row("random")) is None
+    assert check_keywords(create_row("random", category="תקשורת ומחשבים"), "Telecom") == "Telecom"
+    assert check_keywords(create_row("random"), "Telecom") is None
 
-def test_check_entertainment():
-    assert check_entertainment(create_row("random", category="אירועים")) == "Entertainment & Events"
-    assert check_entertainment(create_row("random")) is None
+def test_check_social_fun():
+    assert check_keywords(create_row("random", category="אירועים"), "Social & Fun") == "Social & Fun"
+    assert check_keywords(create_row("random", category="פנאי בילוי"), "Social & Fun") == "Social & Fun"
+    assert check_keywords(create_row("schnitt"), "Social & Fun") == "Social & Fun"
+    assert check_keywords(create_row("random"), "Social & Fun") is None
 
 def test_map_category_integration():
     # Test the full chain with tricky cases

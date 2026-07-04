@@ -87,7 +87,7 @@ def map_category(row: pd.Series) -> str:
         return "Transport & Car"
 
     if orig_cat == 'אירועים':
-        return "Entertainment & Events"
+        return "Social & Fun"
 
     if orig_cat == 'מסעדות':
         return "Eating out"

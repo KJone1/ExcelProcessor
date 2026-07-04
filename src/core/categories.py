@@ -1,5 +1,21 @@
-import re
 import pandas as pd
+import yaml
+
+CATEGORIES_PATH = "src/core/categories.yaml"
+
+
+def load_categories() -> dict[str, list[str]]:
+    try:
+        with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
+            loaded = yaml.safe_load(f)
+            if isinstance(loaded, dict):
+                return loaded
+    except (OSError, yaml.YAMLError):
+        pass
+    return {}
+
+
+_categories: dict[str, list[str]] = load_categories()
 
 
 def check_reimbursable(row: pd.Series) -> str | None:
@@ -21,173 +37,31 @@ def check_rent(row: pd.Series) -> str | None:
     return None
 
 
-def check_health(row: pd.Series) -> str | None:
+def check_keywords(row: pd.Series, category: str) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
-    keywords = ["iherb", "רפואה ובריאות", "קוסמטיקה"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Health & Cosmetics"
-    return None
-
-
-def check_home_decor(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["online home items", "booom", "ריהוט ובית"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Home & Decor"
-    return None
-
-
-def check_eating_out(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["poalim wonder", "מש - קר", "wolt", "מסעדות", "מזון מהיר"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Eating out"
-    return None
-
-
-def check_education(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    keywords = [
-        "course",
-        "udemy",
-        "coursera",
-        "book",
-        "books",
-        "steimatzky",
-        "סטימצקי",
-        "ספרים",
-        "מכון טכנולוגי",
-        "h.i.t",
-        "מכון אקדמי טכנולוגי חולון",
-        "מעונות חולון",
-        "חניון מעונות",
-    ]
-    if any(x in name for x in keywords) or re.search(r"\bhit\b", name):
-        return "Education & Learning"
-    return None
-
-
-def check_transport(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["parking", "חניון", "pango", "פנגו", "רב-פס", "אנרגיה", "רכב ותחבורה"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Transport & Car"
-    return None
-
-
-def check_appearance(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["clothing", "fashion", "salon", "barber", "haircut", "אופנה", "טיוח ויופי"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Appearance & Grooming"
-    return None
-
-
-def check_vacation(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    keywords = [
-        "hotel",
-        "הוטל",
-        "airbnb",
-        "booking",
-        "flight",
-        "travel",
-        "el al",
-        "נתבג",
-        'חו"ל',
-        "voye global connectivi",
-    ]
-    if any(x in name for x in keywords) or re.search(r"\bחול\b", name):
-        return "Vacation & Travel"
-    return None
-
-
-def check_gifts(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    keywords = ["gift", "donation", "charity", "מתנה", "תרומה"]
-    if any(x in name for x in keywords):
-        return "Gifts & Charity"
-    return None
-
-
-def check_subscriptions(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["bitwarden", "addy.io", "google", "netflix", "apple.com/bill", "Subscriptions"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Subscriptions"
-    return None
-
-
-def check_electronics(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    keywords = [
-        "gadget",
-        "electronic",
-        "ksp",
-        "ivory",
-        "קי.אס.פי.",
-        "קיי.אס.פי",
-        "פי.אס.קיי",
-        "פי.אס.קי",
-        "k s p",
-        "aliexpress",
-    ]
-    if any(x in name for x in keywords):
-        return "Electronics & Gadgets"
-    return None
-
-
-def check_groceries(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["קרמה +", "מזון ומשקאות", "מזון מהיר"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Groceries"
-    return None
-
-
-def check_government(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["עיריית", "מוסדות"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Government & Municipal"
-    return None
-
-
-def check_telecom(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["תקשורת ומחשבים"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Telecom"
-    return None
-
-
-def check_entertainment(row: pd.Series) -> str | None:
-    name = row["Payee"].lower()
-    cat = row["Category"]
-    keywords = ["אירועים"]
-    if any(x in name for x in keywords) or cat in keywords:
-        return "Entertainment & Events"
+    keywords = _categories.get(category, [])
+    for keyword in keywords:
+        if keyword.startswith("e:"):
+            if name == keyword[2:]:
+                return category
+        elif keyword in name or cat == keyword:
+            return category
     return None
 
 
 def map_category(row: pd.Series) -> str:
-    checks = [
-        func for name, func in globals().items()
-        if name.startswith("check_") and callable(func)
-    ]
+    res = check_reimbursable(row)
+    if res:
+        return res
 
-    for check in checks:
-        result = check(row)
-        if isinstance(result, str):
-            return result
+    res = check_rent(row)
+    if res:
+        return res
+
+    for category in _categories:
+        res = check_keywords(row, category)
+        if res:
+            return res
 
     return "Misc & One-offs"

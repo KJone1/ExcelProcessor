@@ -11,11 +11,13 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "pypdf>=5.0.0",
     "faker>=37.12.0",
+    "pyyaml>=6.0.1",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
 ]
 
 [dependency-groups]
 dev = [
-    "bandit>=1.8.6",
     "basedpyright>=1.37.2",
     "flake8>=7.3.0",
     "mypy>=1.19.1",
@@ -23,7 +25,7 @@ dev = [
     "pylint>=3.3.9",
     "pytest>=8.4.2",
     "types-openpyxl>=3.1.5.20250919",
-    "vulture>=2.14",
+    "types-pyyaml",
 ]
 
 [tool.mypy]

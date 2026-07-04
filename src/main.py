@@ -1,43 +1,10 @@
 import os
 import sys
 
+import uvicorn
 from dotenv import load_dotenv
 
-from src.core.excel import (
-    discard_row_if_amount_missing,
-    format_date_column,
-    remap_categories,
-    sort_by_category,
-    standardize_columns,
-)
-from src.io.actual import import_payslip_to_actual, import_transactions_to_actual
-from src.io.console import print_payslip_report, print_transactions_report
-from src.io.filesystem import decrypt_pdf, extract_payslip_data, read_excel, write_csv
-
 _ = load_dotenv()
-
-
-def process_excel_pipeline(file_path: str) -> None:
-    df = (
-        read_excel(file_path)
-        .pipe(standardize_columns)
-        .pipe(discard_row_if_amount_missing)
-        .pipe(format_date_column)
-        .pipe(remap_categories)
-        .pipe(sort_by_category)
-    )
-
-    csv_path = "actual.csv"
-    write_csv(df, csv_path)
-    print_transactions_report(csv_path)
-    import_transactions_to_actual(csv_path)
-
-
-def process_payslip_pipeline(file_path: str, password: str) -> None:
-    decrypt_pdf(file_path, password)
-    data = extract_payslip_data(file_path)
-    print_payslip_report(data)
-    import_payslip_to_actual(data)
 
 
 def main():
@@ -48,15 +15,8 @@ def main():
         print(f"Error: Missing required environment variables: {', '.join(missing_vars)}")
         sys.exit(1)
 
-    if os.path.exists("data.xlsx"):
-        process_excel_pipeline("data.xlsx")
-
-    if os.path.exists("payslip.pdf"):
-        password = os.getenv("PAYSLIP_PASSWORD")
-        if password:
-            process_payslip_pipeline("payslip.pdf", password)
-        else:
-            print("Error: PAYSLIP_PASSWORD environment variable is missing.")
+    print("Starting FastAPI backend on http://localhost:8000 ...")
+    uvicorn.run("src.api:app", host="127.0.0.1", port=8000, log_level="info")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel & Payslip Processor Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+    <!-- Main Container -->
+    <main class="app-container">
+
+        <!-- Toast Notification Area -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <div class="dashboard-grid">
+            <!-- Left Column: Statement Details & Transactions -->
+            <section class="main-column">
+                <!-- No Files Warning -->
+                <div id="no-files-card" class="card warning-card hidden">
+                    <h2>No Statement Files Found</h2>
+                    <p>Please place <code>data.xlsx</code> or <code>payslip.pdf</code> in the project root directory to begin.</p>
+                </div>
+
+                <!-- Excel Data section -->
+                <div id="excel-section" class="hidden">
+                    <!-- Metrics Card -->
+                    <div class="card metrics-card">
+                        <h2>Statement Summary Metrics (data.xlsx)</h2>
+                        <div class="payslip-metrics">
+                            <div class="payslip-metric">
+                                <span class="metric-label">Total Outflows</span>
+                                <span id="metric-outflows" class="metric-value">₪0.00</span>
+                            </div>
+                            <div class="payslip-metric">
+                                <span class="metric-label">Avg Transaction</span>
+                                <span id="metric-avg" class="metric-value">₪0.00</span>
+                            </div>
+                            <div class="payslip-metric">
+                                <span class="metric-label">Transactions</span>
+                                <span id="metric-count" class="metric-value">0</span>
+                            </div>
+                        </div>
+                        <button id="btn-sync-transactions" class="btn btn-primary btn-large">
+                            <span class="btn-text">Sync Transactions to Actual Budget</span>
+                            <span class="spinner hidden"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Settings & Payslip -->
+            <section class="side-column">
+                <!-- Payslip Decryption and Sync Panel -->
+                <div id="payslip-card" class="card payslip-card hidden">
+                    <h2>Payslip Decryption (payslip.pdf)</h2>
+                    
+                    <!-- Password entry view -->
+                    <div id="payslip-password-section" class="hidden">
+                        <p class="section-description">This PDF file is password protected. Enter the password below to decrypt and parse it.</p>
+                        <div class="input-group">
+                            <label for="payslip-password">Enter Payslip PDF Password</label>
+                            <input type="password" id="payslip-password" placeholder="PDF Password">
+                        </div>
+                        <button id="btn-decrypt-payslip" class="btn btn-secondary">
+                            <span class="btn-text">Load & Extract Payslip</span>
+                            <span class="spinner hidden"></span>
+                        </button>
+                    </div>
+
+                    <!-- Metrics preview view -->
+                    <div id="payslip-metrics-section" class="hidden">
+                        <div class="payslip-metrics">
+                            <div class="payslip-metric">
+                                <span class="metric-label">Net to Bank</span>
+                                <span id="payslip-net" class="metric-value">₪0.00</span>
+                            </div>
+                            <div class="payslip-metric">
+                                <span class="metric-label">Gross Taxable Income</span>
+                                <span id="payslip-gross" class="metric-value">₪0.00</span>
+                            </div>
+                            <div class="payslip-metric">
+                                <span class="metric-label">Payment Date</span>
+                                <span id="payslip-date" class="metric-value">N/A</span>
+                            </div>
+                        </div>
+                        <button id="btn-sync-payslip" class="btn btn-primary btn-large">
+                            <span class="btn-text">Sync Payslip to Actual Budget</span>
+                            <span class="spinner hidden"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

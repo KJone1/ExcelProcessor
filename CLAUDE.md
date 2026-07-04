@@ -42,11 +42,11 @@ The project is designed as a functional data transformation pipeline, adhering t
   - `PAYSLIP_PASSWORD`: Password for encrypted payslip PDFs.
 
 ### Key Commands
-Refer to the `justfile` and `run.sh` for the primary commands used to build, run, and test the project.
+Refer to the `justfile` for the primary commands used to build, run, and test the project.
 
 ### Standalone Utility Scripts
 These isolated helper scripts are separate from the main pipeline and leverage PEP 723 inline metadata to run in auto-provisioned environments via `uv run <script>` (or via `just` commands):
-- **Run budget schema exploration**: `just explore` (runs `scripts/explore_accounts.py` and `scripts/explore_categories.py`)
+- **Run budget schema exploration**: `just explore` (runs `scripts/list_accounts.py` and `scripts/list_categories.py`)
 - **Zero out category balances**: `just zero-out` (runs `scripts/zero_out_balances.py`)
 
 ---
@@ -59,8 +59,8 @@ These isolated helper scripts are separate from the main pipeline and leverage P
 - **Hebrew Support:** The codebase handles Hebrew column names and categories commonly found in Israeli bank/credit card statements.
 
 ### Data Flow
-1.  **Entry Point:** `run.sh` initiates the process.
-2.  **Discovery & Preparation:** `run.sh` searches the `~/Downloads` directory for the latest `.xlsx` statement and `payslip*.pdf`. It copies them to the project root as `data.xlsx` and `payslip.pdf`, respectively, after cleaning up old files.
-3.  **Execution:** `run.sh` calls `uv run python -m src.main`.
+1.  **Entry Point:** `just run` initiates the process.
+2.  **Discovery & Preparation:** The `init` target (run as a dependency of `just run`) searches the `~/Downloads` directory for the latest `.xlsx` statement and `payslip*.pdf`. It copies them to the project root as `data.xlsx` and `payslip.pdf`, respectively, after cleaning up old files, and runs `uv sync`.
+3.  **Execution:** The `run` target starts the FastAPI server (`uv run python -m src.main`).
 4.  **Excel Pipeline:** `src/main.py` reads `data.xlsx`, processes it using `src/core/excel.py`, writes `actual.csv`, prints a report, and imports to Actual Budget.
 5.  **Payslip Pipeline (Optional):** If `payslip.pdf` exists, `src/main.py` decrypts it, extracts data using `src/core/pdf.py`, prints a report, and imports to Actual Budget.

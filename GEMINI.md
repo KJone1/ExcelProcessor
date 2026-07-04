@@ -1,4 +1,4 @@
-# CLAUDE.md - Excel Processor
+# GEMINI.md - Excel Processor
 
 ## Project Overview
 Excel Processor is a personal finance automation tool designed to streamline the management of credit card statements and payslips. It cleans and categorizes transaction data from Excel files, extracts salary information from PDF payslips, generates detailed expense reports, and integrates directly with the [Actual Budget](https://actualbudget.org/) application.

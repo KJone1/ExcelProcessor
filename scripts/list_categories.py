@@ -7,9 +7,10 @@
 
 import os
 import sys
-from dotenv import load_dotenv
+
 from actual import Actual
 from actual.queries import get_category_groups
+from dotenv import load_dotenv
 
 _ = load_dotenv()
 

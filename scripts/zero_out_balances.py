@@ -7,10 +7,10 @@
 
 import os
 import sys
-from datetime import date
 from collections.abc import Iterable
+from datetime import date
 from typing import Any
-from dotenv import load_dotenv
+
 from actual import Actual
 from actual.queries import (
     create_budget,
@@ -18,6 +18,7 @@ from actual.queries import (
     get_categories,
     get_transactions,
 )
+from dotenv import load_dotenv
 
 _ = load_dotenv()
 

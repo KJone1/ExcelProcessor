@@ -1,32 +1,36 @@
 # GEMINI.md - Excel Processor
 
 ## Project Overview
-Excel Processor is a personal finance automation tool designed to streamline the management of credit card statements and payslips. It cleans and categorizes transaction data from Excel files, extracts salary information from PDF payslips, generates detailed expense reports, and integrates directly with the [Actual Budget](https://actualbudget.org/) application.
+Excel Processor is a personal finance automation tool designed to manage credit card statements and payslips. It cleans and categorizes transaction data from Excel files, extracts salary information from PDF payslips, and integrates directly with the [Actual Budget](https://actualbudget.org/) application.
 
 ### Tailored Design Philosophy
-**CRITICAL:** This project is intentionally **non-generic**. It is strictly tailored to the specific, consistent formats of the user's Israeli bank statements and employer payslips.
-- **No Generalization:** Do not attempt to abstract the logic to support multiple banks or different payslip structures unless explicitly requested.
+**CRITICAL:** This project is intentionally **non-generic**. It is strictly tailored to the specific formats of the user's Israeli bank statements and employer payslips.
+- **No Generalization:** Do not attempt to abstract the logic to support multiple banks or different payslip structures.
 - **Format Stability:** The input Excel (`data.xlsx`) and PDF (`payslip.pdf`) are assumed to have a fixed structure (column names, Hebrew labels, and layout).
-- **Direct Mapping:** Logic in `src/main.py`, `src/core/excel.py`, and `src/core/pdf.py` is hardcoded to match these specific formats for maximum efficiency and accuracy for the user's personal use.
+- **Direct Mapping:** Logic in `src/api.py`, `src/core/excel.py`, and `src/core/pdf.py` matches these specific formats.
 
 ### Key Technologies
 - **Language:** Python 3.11+
-- **Data Processing:** `pandas`, `openpyxl`
+- **Data Processing:** `pandas`, `openpyxl`, `pyyaml`
 - **PDF Extraction:** `pypdf`
+- **Web API & Hosting:** `fastapi`, `uvicorn`
 - **Budget Integration:** `actualpy` (Actual Budget API)
 - **Dependency Management:** `uv`
 - **Command Runner:** `just`
+- **Frontend:** Vanilla HTML, CSS, JavaScript
 
 ### Architecture
-The project is designed as a functional data transformation pipeline, adhering to the following principles:
-- **Functional Pipeline:** Data flows through a series of transformations, primarily managed by `pandas` and custom logic.
+The project runs as a FastAPI backend serving a dashboard web UI.
 - **Pure vs. Impure Separation:**
-    - **Pure Functions (`src/core/`):** Contain deterministic logic for data transformation, parsing, and calculation. These functions have no side effects and are easily testable.
-    - **Impure Functions/Scripts (`src/io/` and `src/main.py`):** Handle side effects such as file I/O, PDF decryption, and API interactions with Actual Budget. `src/main.py` orchestrates the pipelines.
+    - **Pure Functions (`src/core/`):** Deterministic logic for data transformation, parsing, and category matching. No side effects.
+    - **Impure Functions (`src/io/` and `src/api.py`):** Handle file I/O, PDF decryption, API interactions, and routing.
 - **Component Breakdown:**
-    - **`src/core/`**: Core pure logic for Excel cleaning (`excel.py`), PDF parsing (`pdf.py`), and category management (`categories.py`).
-    - **`src/io/`**: Impure operations for different formats and services.
-    - **`src/main.py`**: The single entry point that orchestrates the Excel and Payslip pipelines.
+    - **`src/core/`**: Core pure logic for Excel (`excel.py`), PDF (`pdf.py`), and category mapping (`categories.py`, loaded from `categories.yaml`).
+    - **`src/io/`**: Operations for Actual Budget interaction (`actual.py`) and filesystem access (`filesystem.py`).
+    - **`src/models/`**: Shared data structures like `PayslipData`.
+    - **`src/api.py`**: FastAPI routing and endpoints orchestration.
+    - **`src/main.py`**: Server entry point launching the FastAPI application.
+    - **`ui/`**: Single Page Application dashboard serving the frontend.
 
 ---
 
@@ -35,32 +39,32 @@ The project is designed as a functional data transformation pipeline, adhering t
 ### Prerequisites
 - [uv](https://github.com/astral-sh/uv) installed.
 - [just](https://github.com/casey/just) installed.
-- A `.env` file with the following variables:
-  - `ACTUAL_SERVER_URL`: URL of your Actual Budget server.
-  - `ACTUAL_PASSWORD`: Your Actual Budget password.
-  - `ACTUAL_BUDGET_ID`: The ID of the budget file.
-  - `PAYSLIP_PASSWORD`: Password for encrypted payslip PDFs.
+- A `.env` file containing:
+  - `ACTUAL_SERVER_URL`: Actual Budget server URL.
+  - `ACTUAL_PASSWORD`: Actual Budget password.
+  - `ACTUAL_BUDGET_ID`: Actual Budget file ID.
+  - `PAYSLIP_PASSWORD`: Password for encrypted payslips.
 
 ### Key Commands
-Refer to the `justfile` for the primary commands used to build, run, and test the project.
+Refer to the `justfile` for commands to build, run, lint, and test.
 
 ### Standalone Utility Scripts
-These isolated helper scripts are separate from the main pipeline and leverage PEP 723 inline metadata to run in auto-provisioned environments via `uv run <script>` (or via `just` commands):
-- **Run budget schema exploration**: `just explore` (runs `scripts/list_accounts.py` and `scripts/list_categories.py`)
-- **Zero out category balances**: `just zero-out` (runs `scripts/zero_out_balances.py`)
+Helper scripts separate from the pipeline leveraging PEP 723 metadata to run in auto-provisioned environments:
+- **Run budget schema exploration**: `just explore` (runs `list_accounts.py`, `list_categories.py`, `list_tags.py`, `list_payees.py`)
+- **Zero out category balances**: `just zero-out` (runs `zero_out_balances.py`)
 
 ---
 
 ## Development Conventions
 
 ### Coding Style
-- **Type Hinting:** Mandatory for all function signatures and complex variables.
-- **Defensive Copying:** To ensure functions are "pure" and "idiot-proof," always start data transformation functions with `new_df = dataframe.copy()`. This prevents accidental side effects on the input data, regardless of whether subsequent pandas operations return a view or a copy.
-- **Hebrew Support:** The codebase handles Hebrew column names and categories commonly found in Israeli bank/credit card statements.
+- **Type Hinting:** Mandatory for all signatures and complex variables.
+- **Defensive Copying:** Start data transformation functions with `new_df = dataframe.copy()` to prevent side effects on inputs.
+- **Hebrew Support:** Handles Hebrew column names and categories.
 
 ### Data Flow
-1.  **Entry Point:** `just run` initiates the process.
-2.  **Discovery & Preparation:** The `init` target (run as a dependency of `just run`) searches the `~/Downloads` directory for the latest `.xlsx` statement and `payslip*.pdf`. It copies them to the project root as `data.xlsx` and `payslip.pdf`, respectively, after cleaning up old files, and runs `uv sync`.
-3.  **Execution:** The `run` target starts the FastAPI server (`uv run python -m src.main`).
-4.  **Excel Pipeline:** `src/main.py` reads `data.xlsx`, processes it using `src/core/excel.py`, writes `actual.csv`, prints a report, and imports to Actual Budget.
-5.  **Payslip Pipeline (Optional):** If `payslip.pdf` exists, `src/main.py` decrypts it, extracts data using `src/core/pdf.py`, prints a report, and imports to Actual Budget.
+1. **Entry Point:** `just run` initiates the process.
+2. **Discovery & Preparation:** The `init` target deletes old local artifacts, searches `~/Downloads` for exactly one `.xlsx` and at most one `payslip*.pdf`, copies them to the project root as `data.xlsx` and `payslip.pdf`, and runs `uv sync`. It fails if multiple target files exist.
+3. **Execution:** The `run` target starts the FastAPI server (`src/main.py`), which automatically launches `http://localhost:8000/ui/index.html` in the user's default browser.
+4. **Excel Pipeline:** Initiated via the UI `/api/sync/transactions` endpoint. Reads `data.xlsx`, processes it via `src/core/excel.py`, writes `actual.csv`, and imports to Actual Budget.
+5. **Payslip Pipeline (Optional):** Initiated via the UI `/api/sync/payslip` endpoint. Decrypts `payslip.pdf` if needed, extracts data via `src/core/pdf.py`, and imports net pay to Actual Budget.

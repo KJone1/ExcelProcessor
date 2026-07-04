@@ -67,6 +67,10 @@ explore:
     @uv run scripts/list_accounts.py
     @echo ""
     @uv run scripts/list_categories.py
+    @echo ""
+    @uv run scripts/list_tags.py
+    @echo ""
+    @uv run scripts/list_payees.py
 
 zero-out:
     @uv run scripts/zero_out_balances.py

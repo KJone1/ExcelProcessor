@@ -10,7 +10,7 @@ import csv
 import os
 import sys
 from collections.abc import Sequence
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
 from actual import Actual
@@ -87,7 +87,7 @@ def parse_cli_args(
     year = (
         parse_year(arguments[1])
         if len(arguments) == 2
-        else current_year or date.today().year
+        else current_year or datetime.now(tz=UTC).date().year
     )
     return month_boundaries(month, year)
 

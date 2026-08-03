@@ -63,6 +63,9 @@ test:
     uv run pytest
 
 [default]
+help:
+    @just --list
+
 explore:
     @uv run scripts/list_accounts.py
     @echo ""

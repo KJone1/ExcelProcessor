@@ -16,7 +16,7 @@ def main():
         sys.exit(1)
 
     print("Starting FastAPI backend on http://localhost:8000 ...")
-    uvicorn.run("src.api:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("src.api:app", host="127.0.0.1", port=4455, log_level="info")
 
 
 if __name__ == "__main__":

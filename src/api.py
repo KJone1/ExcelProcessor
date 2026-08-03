@@ -8,7 +8,6 @@ import pypdf
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 from src.core.excel import (
     discard_row_if_amount_missing,
@@ -19,11 +18,12 @@ from src.core.excel import (
 )
 from src.io.actual import import_payslip_to_actual, import_transactions_to_actual
 from src.io.filesystem import decrypt_pdf, extract_payslip_data, read_excel, write_csv
+from src.schemas.payslip import PayslipSyncRequest
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    _ = webbrowser.open("http://localhost:8000/ui/index.html")
+    _ = webbrowser.open("http://localhost:4455/ui/index.html")
     yield
     if os.path.exists("actual.csv"):
         os.remove("actual.csv")
@@ -33,11 +33,6 @@ app = FastAPI(title="Excel & Payslip Processor API", lifespan=lifespan)
 
 # Serve frontend static files
 app.mount("/ui", StaticFiles(directory="ui"), name="ui")
-
-
-class PayslipSyncRequest(BaseModel):
-    """Request model for syncing an encrypted payslip PDF."""
-    password: str | None = None
 
 
 @app.get("/")
@@ -72,8 +67,7 @@ def get_data(payslip_password: Annotated[str | None, Query()] = None):
 
             # Outflows (Amount > 0)
             total_spent = float(df[df["Amount"] > 0]["Amount"].sum()) if not df.empty else 0.0
-            avg_trans = float(df["Amount"].mean()) if not df.empty else 0.0
-            trans_count = int(len(df))
+            trans_count = len(df)
 
             spent_by_cat = df[df["Amount"] > 0].groupby("Category")["Amount"].sum()
             if not spent_by_cat.empty:
@@ -89,17 +83,16 @@ def get_data(payslip_password: Annotated[str | None, Query()] = None):
                 "exists": True,
                 "metrics": {
                     "total_spent": total_spent,
-                    "avg_trans": avg_trans,
                     "trans_count": trans_count,
                     "top_category": top_cat,
                     "top_category_amount": top_cat_amt,
                 },
                 "transactions": transactions
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             excel_response = {
                 "exists": True,
-                "error": f"Failed to process Excel file: {str(e)}"
+                "error": f"Failed to process Excel file: {e!s}"
             }
 
     if payslip_exists:
@@ -126,8 +119,8 @@ def get_data(payslip_password: Annotated[str | None, Query()] = None):
                         "taxable_income": extracted.taxable_income,
                         "net_to_bank": extracted.net_to_bank
                     }
-                except Exception as ex:
-                    error_message = f"Decryption failed: {str(ex)}"
+                except Exception as ex:  # noqa: BLE001
+                    error_message = f"Decryption failed: {ex!s}"
 
             payslip_response = {
                 "exists": True,
@@ -135,10 +128,10 @@ def get_data(payslip_password: Annotated[str | None, Query()] = None):
                 "data": payslip_data,
                 "error": error_message
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             payslip_response = {
                 "exists": True,
-                "error": f"Failed to read PDF file: {str(e)}"
+                "error": f"Failed to read PDF file: {e!s}"
             }
 
     return {
@@ -167,7 +160,7 @@ def sync_transactions():
         import_transactions_to_actual(csv_path)
         return {"status": "success", "message": "Successfully synchronized transactions to Actual Budget"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Synchronization failed: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Synchronization failed: {e!s}") from e
 
 
 @app.post("/api/sync/payslip")
@@ -189,4 +182,4 @@ def sync_payslip(request: PayslipSyncRequest):
         import_payslip_to_actual(payslip_data)
         return {"status": "success", "message": "Successfully synchronized payslip to Actual Budget"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Synchronization failed: {str(e)}") from e
+        raise HTTPException(status_code=500, detail=f"Synchronization failed: {e!s}") from e

@@ -9,7 +9,6 @@ const noFilesCard = document.getElementById("no-files-card");
 const excelSection = document.getElementById("excel-section");
 
 const metricOutflows = document.getElementById("metric-outflows");
-const metricAvg = document.getElementById("metric-avg");
 const metricCount = document.getElementById("metric-count");
 
 
@@ -66,12 +65,7 @@ function showToast(message, type = "info") {
   const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
 
-  let emoji = "ℹ️";
-  if (type === "success") emoji = "🟢";
-  if (type === "error") emoji = "🔴";
-
   toast.innerHTML = `
-        <span class="toast-icon">${emoji}</span>
         <div class="toast-message">${message}</div>
         <button class="toast-close">&times;</button>
     `;
@@ -133,7 +127,6 @@ async function loadDashboardData(payslipPassword = "") {
       } else if (excel.metrics) {
         // Populate metrics
         metricOutflows.textContent = formatCurrency(excel.metrics.total_spent);
-        metricAvg.textContent = formatCurrency(excel.metrics.avg_trans);
         metricCount.textContent = excel.metrics.trans_count;
 
 

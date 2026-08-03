@@ -1,10 +1,12 @@
 import pandas as pd
+
 from src.core.categories import (
-    map_category, 
-    check_reimbursable, 
-    check_rent, 
-    check_keywords
+    check_keywords,
+    check_reimbursable,
+    check_rent,
+    map_category,
 )
+
 
 def create_row(payee="", amount=0.0, category="Unknown"):
     return pd.Series({"Payee": payee, "Amount": amount, "Category": category})
@@ -112,6 +114,12 @@ def test_check_social_fun():
     assert check_keywords(create_row("random", category="פנאי בילוי"), "Social & Fun") == "Social & Fun"
     assert check_keywords(create_row("schnitt"), "Social & Fun") == "Social & Fun"
     assert check_keywords(create_row("random"), "Social & Fun") is None
+
+
+def test_map_category_prioritizes_merchant_over_source_category():
+    assert map_category(create_row("schnitt", category="מסעדות")) == "Social & Fun"
+    assert map_category(create_row("ordinary restaurant", category="מסעדות")) == "Eating out"
+
 
 def test_map_category_integration():
     # Test the full chain with tricky cases

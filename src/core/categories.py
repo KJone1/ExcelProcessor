@@ -31,23 +31,41 @@ def check_rent(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
     amount = row["Amount"]
     keywords = ["paybox"]
-    if any(x in name for x in keywords):
-        if 2900 <= amount <= 3100 or 800 <= amount <= 900:
-            return "Home & Decor"
+    if any(x in name for x in keywords) and (
+        2900 <= amount <= 3100 or 800 <= amount <= 900
+    ):
+        return "Home & Decor"
     return None
 
 
-def check_keywords(row: pd.Series, category: str) -> str | None:
+def _check_keywords(
+    row: pd.Series,
+    category: str,
+    *,
+    match_payee: bool,
+    match_source_category: bool,
+) -> str | None:
     name = row["Payee"].lower()
     cat = row["Category"]
     keywords = _categories.get(category, [])
     for keyword in keywords:
         if keyword.startswith("e:"):
-            if name == keyword[2:]:
+            if match_payee and name == keyword[2:]:
                 return category
-        elif keyword in name or cat == keyword:
+        elif (match_payee and keyword in name) or (
+            match_source_category and cat == keyword
+        ):
             return category
     return None
+
+
+def check_keywords(row: pd.Series, category: str) -> str | None:
+    return _check_keywords(
+        row,
+        category,
+        match_payee=True,
+        match_source_category=True,
+    )
 
 
 def map_category(row: pd.Series) -> str:
@@ -60,7 +78,22 @@ def map_category(row: pd.Series) -> str:
         return res
 
     for category in _categories:
-        res = check_keywords(row, category)
+        res = _check_keywords(
+            row,
+            category,
+            match_payee=True,
+            match_source_category=False,
+        )
+        if res:
+            return res
+
+    for category in _categories:
+        res = _check_keywords(
+            row,
+            category,
+            match_payee=False,
+            match_source_category=True,
+        )
         if res:
             return res
 

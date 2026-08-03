@@ -1,10 +1,11 @@
-import pypdf
-import re
 import os
-from datetime import datetime
-from dotenv import load_dotenv
+import re
+from datetime import date
+
+import pypdf
 from actual import Actual
-from actual.queries import get_accounts, get_categories, create_transaction
+from actual.queries import create_transaction, get_accounts, get_categories
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -34,7 +35,7 @@ def extract_payslip_data(pdf_path):
             with open(pdf_path, "wb") as f:
                 writer.write(f)
             print(f"PDF unlocked and saved to {pdf_path}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(f"Error decrypting PDF: {e}")
             return
 
@@ -62,7 +63,8 @@ def extract_payslip_data(pdf_path):
             try:
                 # Verify it's a valid date
                 d_str = match.group(1)
-                datetime.strptime(d_str, "%m/%Y")
+                month, year = map(int, d_str.split("/"))
+                date(year, month, 1)
                 payslip_date = d_str
                 break
             except ValueError:
@@ -182,7 +184,7 @@ def import_to_actual(amount, date_str):
             next_month = month + 1
             next_year = year
             
-        trans_date = datetime(next_year, next_month, 1).date()
+        trans_date = date(next_year, next_month, 1)
         print(f"Transaction Date: {trans_date}")
 
         with Actual(base_url=SERVER_URL, password=ACTUAL_PASSWORD) as actual:
@@ -210,8 +212,7 @@ def import_to_actual(amount, date_str):
                 return
             print(f"Using category: {category.name}")
 
-            payslip_dt = datetime.strptime(date_str, "%m/%Y")
-            month_name = payslip_dt.strftime("%B")
+            month_name = date(year, month, 1).strftime("%B")
             description = f"Salary for {month_name}"
             
             print(f"Creating transaction: {amount:,.2f}")
@@ -231,7 +232,7 @@ def import_to_actual(amount, date_str):
             actual.sync()
             print("Transaction imported successfully.")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Error importing to Actual: {e}")
 
 if __name__ == "__main__":

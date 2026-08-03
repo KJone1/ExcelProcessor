@@ -1,6 +1,7 @@
-import pandas as pd
-import re
 import os
+import re
+
+import pandas as pd
 
 INPUT_FILE = "out.xlsx"
 OUTPUT_FILE = "actual.csv"
@@ -156,7 +157,7 @@ def main():
         df.to_csv(OUTPUT_FILE, index=False)
         print(f"Successfully created {OUTPUT_FILE} with Actual Budget categories")
         
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"Error: {e}")
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
-import pandas as pd
 import os
-from src.io.filesystem import read_excel
+
+import pandas as pd
+
 from src.core.excel import discard_row_if_amount_missing
+from src.io.filesystem import read_excel
 from tests.generate_mock_excel import generate_mock_excel
 
 GOLDEN_FILE = "golden_statement.xlsx"

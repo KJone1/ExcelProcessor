@@ -1,7 +1,8 @@
-import sys
 import os
 import re
+import sys
 from typing import Any, cast
+
 import pandas as pd
 
 INPUT_FILE = "out.xlsx"

@@ -1,15 +1,15 @@
 import csv
 import os
-from datetime import datetime, date
+from datetime import date
 
 from actual import Actual
 from actual.queries import (
+    create_budget,
     create_transaction,
     get_accounts,
-    get_categories,
     get_budgets,
+    get_categories,
     get_transactions,
-    create_budget,
 )
 from dotenv import load_dotenv
 
@@ -114,7 +114,7 @@ def main():
                     if not date_str or not amount_str:
                         continue
 
-                    date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                    date_obj = date.fromisoformat(date_str)
                     amount_float = float(amount_str)
 
                     # Invert sign: CSV (Positive=Expense) -> Actual (Negative=Expense)
@@ -134,14 +134,14 @@ def main():
                     
                     affected_months.add(int(date_obj.strftime("%Y%m")))
                     count += 1
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     print(f"Error processing row {row}: {e}")
 
         if count > 0:
             print(f"Imported {count} transactions. Adjusting budgets...")
             
             # Zero out balances for all affected months
-            zero_out_balances(session, categories, sorted(list(affected_months)))
+            zero_out_balances(session, categories, sorted(affected_months))
             
             print("Committing changes...")
             actual.commit()

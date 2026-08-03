@@ -1,6 +1,9 @@
 from datetime import date
+
 import pytest
-from src.core.pdf import extract_payslip_date, extract_gross_pay, extract_net_pay
+
+from src.core.pdf import extract_gross_pay, extract_net_pay, extract_payslip_date
+
 
 def test_extract_payslip_date():
     text = "תלוש משכורת לחודש\n01/2026"

@@ -1,6 +1,6 @@
 import csv
 import os
-from datetime import date, datetime
+from datetime import date
 
 from actual import Actual
 from actual.queries import (
@@ -108,7 +108,7 @@ def import_transactions_to_actual(csv_path: str) -> None:
                 if not date_str or not amount_str:
                     continue
 
-                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                date_obj = date.fromisoformat(date_str)
                 amount_float = float(amount_str)
 
                 # Invert sign: CSV (Positive=Expense) -> Actual (Negative=Expense)

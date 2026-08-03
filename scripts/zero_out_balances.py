@@ -43,7 +43,7 @@ def discover_budget_months(budgets: Iterable[Any], transactions: Iterable[Any]) 
             if len(date_str) >= 6 and date_str[:6].isdigit():
                 months_set.add(int(date_str[:6]))
 
-    return sorted(list(months_set))
+    return sorted(months_set)
 
 
 def map_budget_data(budgets: Iterable[Any]) -> dict[tuple[int, str], tuple[int, int]]:

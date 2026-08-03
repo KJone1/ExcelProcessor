@@ -1,12 +1,12 @@
-from datetime import datetime
+from datetime import date
 
 MOCK_DATA = {
     "תאריך\nעסקה": [
-        datetime(2025, 12, 1),
-        datetime(2025, 11, 30),
-        datetime(2025, 11, 29),
-        datetime(2025, 11, 29),
-        datetime(2025, 11, 28),
+        date(2025, 12, 1),
+        date(2025, 11, 30),
+        date(2025, 11, 29),
+        date(2025, 11, 29),
+        date(2025, 11, 28),
     ],
     "שם בית עסק": [
         "IHERB IHERB.COM",

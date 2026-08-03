@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import date
 
 import numpy as np
 import pandas as pd
@@ -128,7 +128,7 @@ def generate_mock_excel(
     data = []
     for i in range(num_rows):
         day = random.randint(1, 31)
-        date = datetime(2026, 3, day)
+        transaction_date = date(2026, 3, day)
         name = random.choice(NAMES)
 
         category = random.choice(CATEGORIES)
@@ -141,7 +141,7 @@ def generate_mock_excel(
             amount = np.nan
 
         row = {
-            "תאריך\nעסקה": date,
+            "תאריך\nעסקה": transaction_date,
             "שם בית עסק": name,
             "סכום\nעסקה": amount,
             "סכום\nחיוב": amount,

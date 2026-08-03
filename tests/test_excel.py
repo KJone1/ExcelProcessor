@@ -1,9 +1,11 @@
-import pytest
 import os
+
+import pytest
+
 from src.core.excel import (
+    discard_row_if_amount_missing,
+    sort_by_category,
     standardize_columns,
-    discard_row_if_amount_missing, 
-    sort_by_category
 )
 from src.io.filesystem import read_excel
 from tests.generate_mock_excel import generate_mock_excel

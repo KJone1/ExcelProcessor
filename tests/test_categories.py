@@ -80,6 +80,8 @@ def test_check_subscriptions():
     assert check_keywords(create_row("netflix"), "Subscriptions") == "Subscriptions"
     assert check_keywords(create_row("apple.com/bill"), "Subscriptions") == "Subscriptions"
     assert check_keywords(create_row("bitwarden"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("chatgpt"), "Subscriptions") == "Subscriptions"
+    assert check_keywords(create_row("payforge"), "Subscriptions") == "Subscriptions"
     assert check_keywords(create_row("random", category="Subscriptions"), "Subscriptions") == "Subscriptions"
     assert check_keywords(create_row("random"), "Subscriptions") is None
 

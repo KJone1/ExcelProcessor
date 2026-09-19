@@ -15,7 +15,7 @@ def main():
         print(f"Error: Missing required environment variables: {', '.join(missing_vars)}")
         sys.exit(1)
 
-    print("Starting FastAPI backend on http://localhost:8000 ...")
+    print("Starting FastAPI backend on http://localhost:4455 ...")
     uvicorn.run("src.api:app", host="127.0.0.1", port=4455, log_level="info")
 
 

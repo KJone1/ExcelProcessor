@@ -1,5 +1,4 @@
 // State Variables
-let actualStatus = null;
 let currentPayslipPassword = "";
 
 // DOM Elements
@@ -221,10 +220,6 @@ async function syncPayslip() {
 function showPayslipPasswordInput() {
   payslipPasswordSection.classList.remove("hidden");
   payslipMetricsSection.classList.add("hidden");
-  btnDecryptPayslip.querySelector(".spinner").classList.add("hidden");
-  btnDecryptPayslip.querySelector(".btn-text").textContent =
-    "Load & Extract Payslip";
-  btnDecryptPayslip.disabled = false;
 }
 
 function showPayslipMetrics() {
@@ -243,19 +238,14 @@ function toggleLoading(btnElement, isLoading) {
       textSpan.textContent = "Syncing transactions...";
     } else if (btnElement === btnSyncPayslip) {
       textSpan.textContent = "Syncing payslip...";
-    } else if (btnElement === btnDecryptPayslip) {
-      textSpan.textContent = "Decrypting...";
     }
   } else {
     btnElement.disabled = false;
     spinnerSpan.classList.add("hidden");
     if (btnElement === btnSyncTransactions) {
-      textSpan.textContent = "Syncy Transactions to Actual Budget";
       textSpan.textContent = "Sync Transactions to Actual Budget";
     } else if (btnElement === btnSyncPayslip) {
       textSpan.textContent = "Sync Payslip to Actual Budget";
-    } else if (btnElement === btnDecryptPayslip) {
-      textSpan.textContent = "Load & Extract Payslip";
     }
   }
 }
@@ -271,13 +261,4 @@ function formatCurrency(value) {
       maximumFractionDigits: 2,
     })
   );
-}
-
-function formatNumber(value) {
-  const num = parseFloat(value);
-  if (isNaN(num)) return "0.00";
-  return num.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 }

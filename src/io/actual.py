@@ -92,8 +92,6 @@ def import_transactions_to_actual(csv_path: str) -> None:
         categories = get_categories(session)
         cat_map = {c.name: c for c in categories}
 
-        affected_months: set[int] = set()
-
         # Read CSV
         print(f"Reading {csv_path}...")
         count = 0
@@ -126,7 +124,6 @@ def import_transactions_to_actual(csv_path: str) -> None:
                     notes="Imported via script",
                 )
 
-                affected_months.add(int(date_obj.strftime("%Y%m")))
                 count += 1
 
         if count > 0:

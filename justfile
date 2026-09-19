@@ -59,9 +59,6 @@ lint:
     uv run flake8 --ignore=E501 src scripts
     uv run pylint --disable=C0301,C0114,C0116 src scripts
 
-test:
-    uv run pytest
-
 [default]
 help:
     @just --list

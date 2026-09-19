@@ -46,7 +46,7 @@ The project runs as a FastAPI backend serving a dashboard web UI.
   - `PAYSLIP_PASSWORD`: Password for encrypted payslips.
 
 ### Key Commands
-Refer to the `justfile` for commands to build, run, lint, and test.
+Refer to the `justfile` for commands to build, run, and lint.
 
 ### Standalone Utility Scripts
 Helper scripts separate from the pipeline leveraging PEP 723 metadata to run in auto-provisioned environments:

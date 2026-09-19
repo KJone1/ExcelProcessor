@@ -1,6 +1,6 @@
 {
   "include": ["src", "scripts"],
-  "exclude": ["deprecated", "tests"],
+  "exclude": ["deprecated"],
   "reportAny": "none",
   "reportExplicitAny": "none",
   "reportUnknownMemberType": "none",

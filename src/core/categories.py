@@ -20,16 +20,15 @@ _categories: dict[str, list[str]] = load_categories()
 
 def check_reimbursable(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
-    amount = row["Amount"]
     keywords = ["work expenses", "shared bills"]
-    if amount < 0 or any(x in name for x in keywords):
+    if any(x in name for x in keywords):
         return "Reimburseable"
     return None
 
 
 def check_rent(row: pd.Series) -> str | None:
     name = row["Payee"].lower()
-    amount = row["Amount"]
+    amount = abs(row["Amount"])
     keywords = ["paybox"]
     if any(x in name for x in keywords) and (
         2900 <= amount <= 3100 or 800 <= amount <= 900

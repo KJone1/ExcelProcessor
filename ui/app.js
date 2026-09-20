@@ -198,18 +198,18 @@ function calculateFinancialScorecard(transactions, income) {
 
   // Work in agorot so sums and status comparisons agree at currency precision.
   for (const transaction of transactions) {
+    const category = transaction.Category;
     const amount = Math.round(transaction.Amount * 100);
     const payee = (transaction.Payee || "").toLowerCase();
     const isPaybox = payee.includes("paybox");
     const magnitude = Math.abs(amount);
-    const isRent = isPaybox && magnitude >= 290000 && magnitude <= 310000;
+    const isRent = isPaybox && amount >= 290000 && amount <= 310000;
     const isPayboxUtility = isPaybox && magnitude >= 80000 && magnitude <= 90000;
-    if (isRent) {
-      // The fixed rent already covers payments; rent refunds still reduce housing.
-      if (amount < 0) housing += amount;
-    } else if (isPayboxUtility || utilityCategories.has(transaction.Category) || utilityPayees.test(payee)) {
+    // Rent payments are already covered by the fixed rent.
+    if (isRent) continue;
+    if (isPayboxUtility || utilityCategories.has(category) || utilityPayees.test(payee)) {
       housing += amount;
-    } else if (funCategories.has(transaction.Category)) {
+    } else if (funCategories.has(category)) {
       fun += amount;
     } else {
       essentials += amount;

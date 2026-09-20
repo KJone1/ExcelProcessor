@@ -36,7 +36,7 @@ body {
 /* Main Content Area */
 .app-container {
     padding: 32px;
-    max-width: 1280px;
+    max-width: 1840px;
     min-height: 100vh;
     margin: 0 auto;
     display: flex;
@@ -46,10 +46,9 @@ body {
 /* Grid System */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(0, 2fr);
     gap: 24px;
     width: 100%;
-    max-width: 960px;
     margin: 0 auto;
     align-items: stretch;
 }
@@ -59,6 +58,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
 }
 
 #excel-section {
@@ -170,6 +170,122 @@ body {
     font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
+}
+
+/* Monthly Financial Scorecard */
+.scorecard-card {
+    min-width: 0;
+}
+
+.scorecard-table-container {
+    overflow-x: auto;
+}
+
+.scorecard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    line-height: 20px;
+    text-align: left;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+}
+
+.scorecard-table thead th {
+    color: var(--text-secondary);
+    background-color: var(--border-soft);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.scorecard-table tbody th {
+    font-weight: 600;
+    min-width: 160px;
+}
+
+.scorecard-table td {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.scorecard-detail {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-on-target {
+    color: #047857;
+    background-color: #D1FAE5;
+}
+
+.status-off-target {
+    color: #B91C1C;
+    background-color: #FEE2E2;
+}
+
+.scorecard-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.scorecard-info {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 6px;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    background-color: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.scorecard-info:hover,
+.scorecard-info:focus-visible {
+    color: var(--accent-blue-hover);
+}
+
+.scorecard-tooltip {
+    position: fixed;
+    inset: auto;
+    width: min(300px, calc(100vw - 24px));
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--text-primary);
+    color: var(--card-bg);
+    font-size: 13px;
+    line-height: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
 /* Buttons and Controls */
@@ -328,7 +444,18 @@ body {
 }
 
 /* Responsive collapse rules */
-@media (max-width: 1023px) {
+@media (max-width: 1399px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 960px;
+    }
+
+    .scorecard-card {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767px) {
     .app-container {
         padding: 24px 16px;
     }

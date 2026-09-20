@@ -1,5 +1,6 @@
 // State Variables
 let currentPayslipPassword = "";
+let activeScorecardInfo = null;
 
 // DOM Elements
 const toastContainer = document.getElementById("toast-container");
@@ -27,6 +28,12 @@ const payslipNet = document.getElementById("payslip-net");
 const payslipGross = document.getElementById("payslip-gross");
 const payslipDate = document.getElementById("payslip-date");
 const btnSyncPayslip = document.getElementById("btn-sync-payslip");
+
+const scorecardMessage = document.getElementById("scorecard-message");
+const scorecardContent = document.getElementById("scorecard-content");
+const scorecardRows = document.getElementById("scorecard-rows");
+const scorecardTotalExpenses = document.getElementById("scorecard-total-expenses");
+const scorecardTooltip = document.getElementById("scorecard-tooltip");
 
 // Initialize the dashboard
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,6 +64,17 @@ function setupEventListeners() {
   btnSyncPayslip.addEventListener("click", () => {
     syncPayslip();
   });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") hideScorecardTooltip();
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!activeScorecardInfo?.contains(event.target) && !scorecardTooltip.contains(event.target)) {
+      hideScorecardTooltip();
+    }
+  });
+  window.addEventListener("resize", hideScorecardTooltip);
+  window.addEventListener("scroll", hideScorecardTooltip, true);
 }
 
 // Toast notification helper
@@ -92,6 +110,7 @@ function showToast(message, type = "info") {
 
 // Fetch and load processed statement and payslip data
 async function loadDashboardData(payslipPassword = "") {
+  showScorecardMessage("Loading monthly targets...");
   try {
     let url = "/api/data";
     if (payslipPassword) {
@@ -107,6 +126,8 @@ async function loadDashboardData(payslipPassword = "") {
 
     const excel = data.excel;
     const payslip = data.payslip;
+
+    renderFinancialScorecard(excel, payslip);
 
     // Check if no files exist
     if ((!excel || !excel.exists) && (!payslip || !payslip.exists)) {
@@ -160,8 +181,171 @@ async function loadDashboardData(payslipPassword = "") {
       payslipCard.classList.add("hidden");
     }
   } catch (error) {
+    showScorecardMessage("Unable to load monthly targets. Reload the dashboard to try again.");
     showToast(error.message, "error");
   }
+}
+
+// Derive targets from the same local data used by the other two panels.
+function calculateFinancialScorecard(transactions, income) {
+  const net = Math.round(income.net_to_bank * 100);
+  let housing = 300000;
+  const funCategories = new Set(["Eating out", "Social & Fun", "Vacation & Travel"]);
+  const utilityCategories = new Set(["Electricity", "ארנונה", "Water", "Utilities"]);
+  const utilityPayees = /electricity bill|arnona|bezeq|strauss water|חברת החשמל|חשמל לישראל|ארנונה|בזק|שטראוס מים/i;
+  let essentials = 0;
+  let fun = 0;
+
+  // Work in agorot so sums and status comparisons agree at currency precision.
+  for (const transaction of transactions) {
+    const amount = Math.round(transaction.Amount * 100);
+    const payee = (transaction.Payee || "").toLowerCase();
+    const isPaybox = payee.includes("paybox");
+    const magnitude = Math.abs(amount);
+    const isRent = isPaybox && magnitude >= 290000 && magnitude <= 310000;
+    const isPayboxUtility = isPaybox && magnitude >= 80000 && magnitude <= 90000;
+    if (isRent) {
+      // The fixed rent already covers payments; rent refunds still reduce housing.
+      if (amount < 0) housing += amount;
+    } else if (isPayboxUtility || utilityCategories.has(transaction.Category) || utilityPayees.test(payee)) {
+      housing += amount;
+    } else if (funCategories.has(transaction.Category)) {
+      fun += amount;
+    } else {
+      essentials += amount;
+    }
+  }
+
+  const living = housing + essentials;
+  const totalExpenses = living + fun;
+  const remaining = net - totalExpenses;
+
+  return {
+    totalExpenses: totalExpenses / 100,
+    rows: [
+      {
+        name: "Living Expenses", rule: "No more than 40% of net",
+        description: "Rent + utilities + essentials",
+        target: Math.round(net * 0.40), actual: living, base: net, minimum: false,
+      },
+      {
+        name: "Guilt-Free Fun", rule: "No more than 20% of net",
+        description: "Fun includes Eating out/Wolt, Social & Fun, and Vacation & Travel",
+        target: Math.round(net * 0.20), actual: fun, base: net, minimum: false,
+      },
+      {
+        name: "Monthly Investing", rule: "No less than 40% of net",
+        description: "What's left from net pay after expenses goes to investing.",
+        target: Math.round(net * 0.40), actual: remaining, base: net, minimum: true,
+      },
+    ],
+  };
+}
+
+function showScorecardMessage(message) {
+  hideScorecardTooltip();
+  scorecardContent.classList.add("hidden");
+  scorecardRows.replaceChildren();
+  scorecardTotalExpenses.textContent = "";
+  scorecardMessage.textContent = message;
+  scorecardMessage.classList.remove("hidden");
+}
+
+function renderFinancialScorecard(excel, payslip) {
+  if (!excel?.exists || !payslip?.exists) {
+    showScorecardMessage("Add both data.xlsx and payslip.pdf to the project root to see monthly targets.");
+    return;
+  }
+  if (excel.error || payslip.error) {
+    showScorecardMessage("Monthly targets are unavailable until both files load successfully.");
+    return;
+  }
+  if (!payslip.data && payslip.requires_password) {
+    showScorecardMessage("Unlock the payslip to calculate monthly targets.");
+    return;
+  }
+  if (!Array.isArray(excel.transactions) || !payslip.data) {
+    showScorecardMessage("Monthly targets need categorized transactions and payslip income.");
+    return;
+  }
+
+  const net = payslip.data.net_to_bank;
+  if (!Number.isFinite(net) || net <= 0 ||
+      excel.transactions.some(transaction => !Number.isFinite(transaction.Amount))) {
+    showScorecardMessage("Monthly targets require valid expense amounts and positive net pay.");
+    return;
+  }
+
+  const scorecard = calculateFinancialScorecard(excel.transactions, payslip.data);
+  hideScorecardTooltip();
+  scorecardRows.replaceChildren();
+  for (const row of scorecard.rows) {
+    const tr = document.createElement("tr");
+    const recommendation = document.createElement("th");
+    recommendation.scope = "row";
+    recommendation.textContent = row.name;
+    const info = document.createElement("button");
+    info.type = "button";
+    info.className = "scorecard-info";
+    info.textContent = "i";
+    info.setAttribute("aria-label", `About ${row.name}`);
+    info.addEventListener("mouseenter", () => showScorecardTooltip(info, row.description));
+    info.addEventListener("focus", () => showScorecardTooltip(info, row.description));
+    info.addEventListener("click", () => showScorecardTooltip(info, row.description));
+    info.addEventListener("mouseleave", () => {
+      if (activeScorecardInfo === info && document.activeElement !== info) hideScorecardTooltip();
+    });
+    info.addEventListener("blur", hideScorecardTooltip);
+    recommendation.appendChild(info);
+    const rule = document.createElement("span");
+    rule.className = "scorecard-detail";
+    rule.textContent = row.rule;
+    recommendation.appendChild(rule);
+
+    const target = document.createElement("td");
+    const actual = document.createElement("td");
+    const status = document.createElement("td");
+    const badge = document.createElement("span");
+    const onTarget = row.minimum ? row.actual >= row.target : row.actual <= row.target;
+    const prefix = row.minimum ? "No less than " : "No more than ";
+    target.textContent = prefix + formatCurrency(row.target / 100);
+    actual.textContent = formatCurrency(row.actual / 100);
+
+    const detail = document.createElement("span");
+    detail.className = "scorecard-detail";
+    detail.textContent = `(${(row.actual / row.base * 100).toFixed(1)}%)`;
+    actual.appendChild(detail);
+
+    badge.className = `status-badge ${onTarget ? "status-on-target" : "status-off-target"}`;
+    badge.textContent = onTarget ? "ON TARGET" : "OFF TARGET";
+    status.appendChild(badge);
+    tr.append(recommendation, target, actual, status);
+    scorecardRows.appendChild(tr);
+  }
+  scorecardTotalExpenses.textContent = formatCurrency(scorecard.totalExpenses);
+  scorecardMessage.classList.add("hidden");
+  scorecardContent.classList.remove("hidden");
+}
+
+function hideScorecardTooltip() {
+  scorecardTooltip.hidePopover();
+  activeScorecardInfo?.removeAttribute("aria-describedby");
+  activeScorecardInfo = null;
+}
+
+function showScorecardTooltip(info, description) {
+  hideScorecardTooltip();
+  activeScorecardInfo = info;
+  info.setAttribute("aria-describedby", "scorecard-tooltip");
+  scorecardTooltip.textContent = description;
+  scorecardTooltip.showPopover();
+  const anchor = info.getBoundingClientRect();
+  const tooltip = scorecardTooltip.getBoundingClientRect();
+  const left = Math.max(12, Math.min(anchor.left, window.innerWidth - tooltip.width - 12));
+  const top = anchor.bottom + tooltip.height + 8 <= window.innerHeight
+    ? anchor.bottom + 8 : Math.max(12, anchor.top - tooltip.height - 8);
+  scorecardTooltip.style.left = `${left}px`;
+  scorecardTooltip.style.top = `${top}px`;
 }
 
 // Sync Excel Transactions to Actual Budget
@@ -254,11 +438,9 @@ function toggleLoading(btnElement, isLoading) {
 function formatCurrency(value) {
   const num = parseFloat(value);
   if (isNaN(num)) return "₪0.00";
-  return (
-    "₪" +
-    num.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-  );
+  const formatted = Math.abs(num).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return num < 0 ? `-₪${formatted}` : `₪${formatted}`;
 }

@@ -88,7 +88,30 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Monthly Financial Targets -->
+            <section class="card scorecard-card" aria-labelledby="scorecard-title">
+                <h2 id="scorecard-title">Monthly Financial Targets</h2>
+                <p id="scorecard-message" class="section-description" role="status">Loading monthly targets...</p>
+                <div id="scorecard-content" class="hidden">
+                    <div class="scorecard-table-container" role="region" aria-label="Monthly financial target scorecard" tabindex="0">
+                        <table class="scorecard-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Recommendation</th>
+                                    <th scope="col">Monthly limits</th>
+                                    <th scope="col">Actual</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scorecard-rows"></tbody>
+                        </table>
+                    </div>
+                    <p class="scorecard-total">Total Expenses <strong id="scorecard-total-expenses"></strong></p>
+                </div>
+            </section>
         </div>
+        <div id="scorecard-tooltip" class="scorecard-tooltip" role="tooltip" popover="manual"></div>
     </main>
 
     <script src="app.js"></script>

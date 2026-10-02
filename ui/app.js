@@ -231,9 +231,9 @@ function calculateFinancialScorecard(transactions, income) {
     totalExpenses: totalExpenses / 100,
     rows: [
       {
-        name: "Living Expenses", rule: "No more than 40% of net",
-        description: "Rent + utilities + essentials",
-        target: Math.round(net * 0.40), actual: living, base: net, minimum: false,
+        name: "Living Expenses", rule: "60% of net minus fun spending",
+        description: "Rent + utilities + essentials. Living and fun share up to 60% of net, reserving at least 40% for investing.",
+        target: Math.round(net * 0.60) - fun, actual: living, base: net, minimum: false,
       },
       {
         name: "Guilt-Free Fun", rule: "No more than 20% of net",

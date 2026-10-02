@@ -52,8 +52,7 @@ run: init
     @echo "Pipeline executed successfully"
 
 clean:
-    uv run python -c 'from pathlib import Path; from src.settings import settings; [Path(name).unlink(missing_ok=True) for name in (settings.excel_file, settings.csv_file, settings.payslip_file)]'
-    rm -f *.xlsx *.pdf expense_report.md out.xlsx
+    rm -f *.xlsx *.csv *.pdf expense_report.md out.xlsx
 
 
 lint:

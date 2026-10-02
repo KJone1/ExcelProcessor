@@ -8,7 +8,7 @@ from actual.queries import (
     get_categories,
 )
 
-from src.models.pdf import PayslipData
+from src.models.payslip import PayslipData
 from src.settings import settings
 
 

@@ -18,7 +18,7 @@ from src.core.excel import (
 )
 from src.io.actual import import_payslip_to_actual, import_transactions_to_actual
 from src.io.filesystem import decrypt_pdf, extract_payslip_data, read_excel, write_csv
-from src.schemas.payslip import PayslipSyncRequest
+from src.models.payslip import PayslipSyncRequest
 from src.settings import settings
 
 

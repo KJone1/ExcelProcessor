@@ -2,7 +2,7 @@ import pandas as pd
 import pypdf
 
 from src.core.pdf import extract_gross_pay, extract_net_pay, extract_payslip_date
-from src.models.pdf import PayslipData
+from src.models.payslip import PayslipData
 from src.settings import settings
 
 

@@ -21,14 +21,14 @@
                 <!-- No Files Warning -->
                 <div id="no-files-card" class="card warning-card hidden">
                     <h2>No Statement Files Found</h2>
-                    <p>Please place <code>data.xlsx</code> or <code>payslip.pdf</code> in the project root directory to begin.</p>
+                    <p id="no-files-message">No Excel statement or payslip found.</p>
                 </div>
 
                 <!-- Excel Data section -->
                 <div id="excel-section" class="hidden">
                     <!-- Metrics Card -->
                     <div class="card metrics-card">
-                        <h2>Statement Summary Metrics (data.xlsx)</h2>
+                        <h2 id="excel-summary-title">Statement Summary Metrics</h2>
                         <div class="payslip-metrics">
                             <div class="payslip-metric">
                                 <span class="metric-label">Total Outflows</span>
@@ -51,7 +51,7 @@
             <section class="side-column">
                 <!-- Payslip Decryption and Sync Panel -->
                 <div id="payslip-card" class="card payslip-card hidden">
-                    <h2>Payslip Decryption (payslip.pdf)</h2>
+                    <h2 id="payslip-title">Payslip Decryption</h2>
                     
                     <!-- Password entry view -->
                     <div id="payslip-password-section" class="hidden">

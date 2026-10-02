@@ -6,7 +6,9 @@ let activeScorecardInfo = null;
 const toastContainer = document.getElementById("toast-container");
 
 const noFilesCard = document.getElementById("no-files-card");
+const noFilesMessage = document.getElementById("no-files-message");
 const excelSection = document.getElementById("excel-section");
+const excelSummaryTitle = document.getElementById("excel-summary-title");
 
 const metricOutflows = document.getElementById("metric-outflows");
 const metricCount = document.getElementById("metric-count");
@@ -15,6 +17,7 @@ const metricCount = document.getElementById("metric-count");
 const btnSyncTransactions = document.getElementById("btn-sync-transactions");
 
 const payslipCard = document.getElementById("payslip-card");
+const payslipTitle = document.getElementById("payslip-title");
 const payslipPasswordSection = document.getElementById(
   "payslip-password-section",
 );
@@ -123,6 +126,10 @@ async function loadDashboardData(payslipPassword = "") {
     }
 
     const data = await response.json();
+
+    noFilesMessage.textContent = `Place your statement at ${data.files.excel} or your payslip at ${data.files.payslip} to begin.`;
+    excelSummaryTitle.textContent = `Statement Summary Metrics (${data.files.excel})`;
+    payslipTitle.textContent = `Payslip Decryption (${data.files.payslip})`;
 
     const excel = data.excel;
     const payslip = data.payslip;
@@ -253,7 +260,7 @@ function showScorecardMessage(message) {
 
 function renderFinancialScorecard(excel, payslip) {
   if (!excel?.exists || !payslip?.exists) {
-    showScorecardMessage("Add both data.xlsx and payslip.pdf to the project root to see monthly targets.");
+    showScorecardMessage("Add both an Excel statement and a payslip to see monthly targets.");
     return;
   }
   if (excel.error || payslip.error) {

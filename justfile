@@ -2,6 +2,8 @@ init: clean
     #!/usr/bin/env bash
     set -euo pipefail
     DOWNLOADS_DIR="$HOME/Downloads"
+    excel_destination="$(uv run python -c 'from src.settings import settings; print(settings.excel_file)')"
+    payslip_destination="$(uv run python -c 'from src.settings import settings; print(settings.payslip_file)')"
 
     shopt -s nullglob
     files=("$DOWNLOADS_DIR"/*.xlsx)
@@ -23,8 +25,8 @@ init: clean
 
     target_file="${files[0]}"
     echo "Found file: $target_file"
-    cp "$target_file" data.xlsx
-    echo "Copied $(basename "$target_file") to data.xlsx."
+    cp "$target_file" "$excel_destination"
+    echo "Copied $(basename "$target_file") to $excel_destination."
 
     payslip_count=${#payslip_files[@]}
     if [ "$payslip_count" -gt 1 ]; then
@@ -39,8 +41,8 @@ init: clean
     else
         target_payslip="${payslip_files[0]}"
         echo "Found payslip: $target_payslip"
-        cp "$target_payslip" payslip.pdf
-        echo "Copied $(basename "$target_payslip") to payslip.pdf."
+        cp "$target_payslip" "$payslip_destination"
+        echo "Copied $(basename "$target_payslip") to $payslip_destination."
     fi
 
     uv sync
@@ -50,7 +52,8 @@ run: init
     @echo "Pipeline executed successfully"
 
 clean:
-    rm -f *.xlsx actual.csv *.pdf expense_report.md out.xlsx
+    uv run python -c 'from pathlib import Path; from src.settings import settings; [Path(name).unlink(missing_ok=True) for name in (settings.excel_file, settings.csv_file, settings.payslip_file)]'
+    rm -f *.xlsx *.pdf expense_report.md out.xlsx
 
 
 lint:

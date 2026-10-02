@@ -1,5 +1,4 @@
 import csv
-import os
 from datetime import date
 
 from actual import Actual
@@ -8,24 +7,17 @@ from actual.queries import (
     get_accounts,
     get_categories,
 )
-from dotenv import load_dotenv
 
 from src.models.pdf import PayslipData
+from src.settings import settings
 
 
 def import_payslip_to_actual(payslip_data: PayslipData) -> None:
-    _ = load_dotenv()
-
-    server_url = os.getenv("ACTUAL_SERVER_URL")
-    password = os.getenv("ACTUAL_PASSWORD")
-    budget_id = os.getenv("ACTUAL_BUDGET_ID")
-
-    if not (server_url and password and budget_id):
-        raise ValueError("Missing Actual Budget configuration")
-
-    with Actual(base_url=server_url, password=password) as actual:
-        print(f"Connecting to budget: {budget_id}")
-        _ = actual.set_file(budget_id)
+    with Actual(
+        base_url=settings.actual_server_url, password=settings.actual_password
+    ) as actual:
+        print(f"Connecting to budget: {settings.actual_budget_id}")
+        _ = actual.set_file(settings.actual_budget_id)
         _ = actual.download_budget()
         session = actual.session
 
@@ -68,18 +60,11 @@ def import_payslip_to_actual(payslip_data: PayslipData) -> None:
 
 
 def import_transactions_to_actual(csv_path: str) -> None:
-    _ = load_dotenv()
-
-    server_url = os.getenv("ACTUAL_SERVER_URL")
-    password = os.getenv("ACTUAL_PASSWORD")
-    budget_id = os.getenv("ACTUAL_BUDGET_ID")
-
-    if not (server_url and password and budget_id):
-        raise ValueError("Missing Actual Budget configuration")
-
-    with Actual(base_url=server_url, password=password) as actual:
-        print(f"Connecting to budget: {budget_id}")
-        _ = actual.set_file(budget_id)
+    with Actual(
+        base_url=settings.actual_server_url, password=settings.actual_password
+    ) as actual:
+        print(f"Connecting to budget: {settings.actual_budget_id}")
+        _ = actual.set_file(settings.actual_budget_id)
         _ = actual.download_budget()
         session = actual.session
 

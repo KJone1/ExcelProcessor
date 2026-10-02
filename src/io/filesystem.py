@@ -3,10 +3,11 @@ import pypdf
 
 from src.core.pdf import extract_gross_pay, extract_net_pay, extract_payslip_date
 from src.models.pdf import PayslipData
+from src.settings import settings
 
 
-def read_excel(file_path: str, skiprows: int = 3) -> pd.DataFrame:
-    return pd.read_excel(file_path, skiprows=skiprows)
+def read_excel(file_path: str) -> pd.DataFrame:
+    return pd.read_excel(file_path, skiprows=settings.excel_skiprows)
 
 
 def write_csv(dataframe: pd.DataFrame, output_path: str) -> None:

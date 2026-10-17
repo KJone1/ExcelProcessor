@@ -1,6 +1,6 @@
 # /// script
 # dependencies = [
-#   "actualpy>=0.17.0",
+#   "actualpy==0.20.0",
 #   "python-dotenv>=1.2.1",
 # ]
 # ///

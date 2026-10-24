@@ -20,8 +20,8 @@
             <section class="main-column">
                 <!-- No Files Warning -->
                 <div id="no-files-card" class="card warning-card hidden">
-                    <h2>No Statement Files Found</h2>
-                    <p id="no-files-message">No Excel statement or payslip found.</p>
+                    <h2>No Prepared Data Found</h2>
+                    <p id="no-files-message">Add your source files and restart the app.</p>
                 </div>
 
                 <!-- Excel Data section -->
@@ -49,21 +49,9 @@
 
             <!-- Right Column: Settings & Payslip -->
             <section class="side-column">
-                <!-- Payslip Decryption and Sync Panel -->
+                <!-- Payslip Preview and Sync Panel -->
                 <div id="payslip-card" class="card payslip-card hidden">
-                    <h2 id="payslip-title">Payslip Decryption</h2>
-                    
-                    <!-- Password entry view -->
-                    <div id="payslip-password-section" class="hidden">
-                        <p class="section-description">This PDF file is password protected. Enter the password below to decrypt and parse it.</p>
-                        <div class="input-group">
-                            <label for="payslip-password">Enter Payslip PDF Password</label>
-                            <input type="password" id="payslip-password" placeholder="PDF Password">
-                        </div>
-                        <button id="btn-decrypt-payslip" class="btn btn-secondary">
-                            <span class="btn-text">Load & Extract Payslip</span>
-                        </button>
-                    </div>
+                    <h2 id="payslip-title">Payslip Preview</h2>
 
                     <!-- Metrics preview view -->
                     <div id="payslip-metrics-section" class="hidden">

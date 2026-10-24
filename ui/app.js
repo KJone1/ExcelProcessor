@@ -1,5 +1,4 @@
 // State Variables
-let currentPayslipPassword = "";
 let activeScorecardInfo = null;
 
 // DOM Elements
@@ -18,11 +17,6 @@ const btnSyncTransactions = document.getElementById("btn-sync-transactions");
 
 const payslipCard = document.getElementById("payslip-card");
 const payslipTitle = document.getElementById("payslip-title");
-const payslipPasswordSection = document.getElementById(
-  "payslip-password-section",
-);
-const payslipPasswordInput = document.getElementById("payslip-password");
-const btnDecryptPayslip = document.getElementById("btn-decrypt-payslip");
 
 const payslipMetricsSection = document.getElementById(
   "payslip-metrics-section",
@@ -50,17 +44,6 @@ function setupEventListeners() {
   // Sync Transactions Button
   btnSyncTransactions.addEventListener("click", () => {
     syncTransactions();
-  });
-
-  // Decrypt Payslip Button
-  btnDecryptPayslip.addEventListener("click", () => {
-    const password = payslipPasswordInput.value;
-    if (!password) {
-      showToast("Please enter a password", "error");
-      return;
-    }
-    currentPayslipPassword = password;
-    loadDashboardData(password);
   });
 
   // Sync Payslip Button
@@ -112,24 +95,19 @@ function showToast(message, type = "info") {
 
 
 // Fetch and load processed statement and payslip data
-async function loadDashboardData(payslipPassword = "") {
+async function loadDashboardData() {
   showScorecardMessage("Loading monthly targets...");
   try {
-    let url = "/api/data";
-    if (payslipPassword) {
-      url += `?payslip_password=${encodeURIComponent(payslipPassword)}`;
-    }
-
-    const response = await fetch(url);
+    const response = await fetch("/api/data");
     if (!response.ok) {
       throw new Error("Failed to load dashboard data");
     }
 
     const data = await response.json();
 
-    noFilesMessage.textContent = `Place your statement at ${data.files.excel} or your payslip at ${data.files.payslip} to begin.`;
-    excelSummaryTitle.textContent = `Statement Summary Metrics (${data.files.excel})`;
-    payslipTitle.textContent = `Payslip Decryption (${data.files.payslip})`;
+    noFilesMessage.textContent = "No prepared data is available. Add your source files and restart the app.";
+    excelSummaryTitle.textContent = `Statement Preview (${data.files.excel})`;
+    payslipTitle.textContent = `Payslip Preview (${data.files.payslip})`;
 
     const excel = data.excel;
     const payslip = data.payslip;
@@ -169,20 +147,12 @@ async function loadDashboardData(payslipPassword = "") {
 
       if (payslip.error) {
         showToast(payslip.error, "error");
-        showPayslipPasswordInput();
       } else if (payslip.data) {
-        // Decrypted successfully
         payslipNet.textContent = formatCurrency(payslip.data.net_to_bank);
         payslipGross.textContent = formatCurrency(payslip.data.taxable_income);
         payslipDate.textContent = payslip.data.date;
 
-        showPayslipMetrics();
-        if (payslipPassword) {
-          showToast("Payslip decrypted successfully!", "success");
-        }
-      } else if (payslip.requires_password) {
-        // Encrypted and password not entered / correct yet
-        showPayslipPasswordInput();
+        payslipMetricsSection.classList.remove("hidden");
       }
     } else {
       payslipCard.classList.add("hidden");
@@ -265,10 +235,6 @@ function renderFinancialScorecard(excel, payslip) {
   }
   if (excel.error || payslip.error) {
     showScorecardMessage("Monthly targets are unavailable until both files load successfully.");
-    return;
-  }
-  if (!payslip.data && payslip.requires_password) {
-    showScorecardMessage("Unlock the payslip to calculate monthly targets.");
     return;
   }
   if (!Array.isArray(excel.transactions) || !payslip.data) {
@@ -385,12 +351,6 @@ async function syncPayslip() {
   try {
     const response = await fetch("/api/sync/payslip", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        password: currentPayslipPassword,
-      }),
     });
 
     const result = await response.json();
@@ -408,16 +368,6 @@ async function syncPayslip() {
 }
 
 // UI helper states
-function showPayslipPasswordInput() {
-  payslipPasswordSection.classList.remove("hidden");
-  payslipMetricsSection.classList.add("hidden");
-}
-
-function showPayslipMetrics() {
-  payslipPasswordSection.classList.add("hidden");
-  payslipMetricsSection.classList.remove("hidden");
-}
-
 function toggleLoading(btnElement, isLoading) {
   const textSpan = btnElement.querySelector(".btn-text");
   const spinnerSpan = btnElement.querySelector(".spinner");

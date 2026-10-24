@@ -14,16 +14,15 @@ class ExcelProcessor:
     def process(self) -> None:
         df = pd.read_excel(settings.excel_file, skiprows=settings.excel_skiprows)
         df = (
-            df.pipe(self._standardize_columns)
-            .pipe(self._discard_row_if_amount_missing)
+            df.pipe(self._prepare_transactions)
             .pipe(self._format_date_column)
             .pipe(self._remap_categories)
-            .pipe(self._sort_by_category)
+            .sort_values(by="Category")
         )
         df.to_csv(settings.csv_file, index=False)
 
     @staticmethod
-    def _standardize_columns(dataframe: pd.DataFrame) -> pd.DataFrame:
+    def _prepare_transactions(dataframe: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(
             {
                 "Date": dataframe["תאריך\nעסקה"],
@@ -31,25 +30,7 @@ class ExcelProcessor:
                 "Amount": dataframe["סכום\nחיוב"],
                 "Category": dataframe["ענף"],
             }
-        )
-
-    @staticmethod
-    def _discard_row_if_amount_missing(
-        dataframe: pd.DataFrame,
-        column_name: str = "Amount",
-    ) -> pd.DataFrame:
-        new_df = dataframe.copy()
-        if column_name in new_df.columns:
-            new_df = new_df.dropna(subset=[column_name])
-        return new_df
-
-    @staticmethod
-    def _sort_by_category(
-        dataframe: pd.DataFrame,
-        column_name: str = "Category",
-    ) -> pd.DataFrame:
-        new_df = dataframe.copy()
-        return new_df.sort_values(by=[column_name])
+        ).dropna(subset=["Amount"])
 
     def _remap_categories(
         self,

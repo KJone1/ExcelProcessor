@@ -8,9 +8,10 @@
 import os
 import sys
 
-from actual import Actual
 from actual.queries import get_accounts
 from dotenv import load_dotenv
+
+from actual import Actual
 
 _ = load_dotenv()
 
@@ -24,7 +25,14 @@ if not (server_url and password and budget_id):
 
 
 def balance(account):
-    return sum(transaction.amount for transaction in account.transactions if not transaction.tombstone) / 100.0
+    return (
+        sum(
+            transaction.amount
+            for transaction in account.transactions
+            if not transaction.tombstone
+        )
+        / 100.0
+    )
 
 
 with Actual(base_url=server_url, password=password) as actual:
@@ -32,13 +40,27 @@ with Actual(base_url=server_url, password=password) as actual:
     _ = actual.download_budget()
 
     accounts = get_accounts(actual.session)
-    active_accounts = [account for account in accounts if not getattr(account, "closed", False) and not getattr(account, "tombstone", False)]
+    active_accounts = [
+        account
+        for account in accounts
+        if not getattr(account, "closed", False)
+        and not getattr(account, "tombstone", False)
+    ]
 
-    for header, is_offbudget in [("BUDGET ACCOUNTS", False), ("OFF-BUDGET ACCOUNTS", True)]:
-        group = [account for account in active_accounts if bool(getattr(account, "offbudget", False)) == is_offbudget]
+    for header, is_offbudget in [
+        ("BUDGET ACCOUNTS", False),
+        ("OFF-BUDGET ACCOUNTS", True),
+    ]:
+        group = [
+            account
+            for account in active_accounts
+            if bool(getattr(account, "offbudget", False)) == is_offbudget
+        ]
         if group:
             if is_offbudget:
                 print()
             print(f"{header}:")
             for account in group:
-                print(f"- {account.name} (ID: {account.id}) | Balance: {balance(account):,.2f}")
+                print(
+                    f"- {account.name} (ID: {account.id}) | Balance: {balance(account):,.2f}"
+                )

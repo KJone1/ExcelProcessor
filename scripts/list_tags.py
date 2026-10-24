@@ -9,9 +9,10 @@
 import os
 import sys
 
-from actual import Actual
 from actual.queries import get_tags
 from dotenv import load_dotenv
+
+from actual import Actual
 
 _ = load_dotenv()
 
@@ -29,10 +30,7 @@ with Actual(base_url=server_url, password=password) as actual:
 
     print("BUDGET TAGS:")
     tags = get_tags(actual.session)
-    active_tags = [
-        tag for tag in tags
-        if not getattr(tag, "tombstone", False)
-    ]
+    active_tags = [tag for tag in tags if not getattr(tag, "tombstone", False)]
 
     for tag in sorted(active_tags, key=lambda t: t.tag or ""):
         desc_info = f" - {tag.description}" if tag.description else ""

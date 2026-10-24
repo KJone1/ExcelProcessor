@@ -13,9 +13,10 @@ from collections.abc import Sequence
 from datetime import UTC, date, datetime
 from typing import Any
 
-from actual import Actual
 from actual.queries import get_transactions
 from dotenv import load_dotenv
+
+from actual import Actual
 
 USAGE = "Usage: uv run scripts/list_transactions.py <month> [year]"
 MONTHS = {
@@ -70,7 +71,9 @@ def month_boundaries(month: int, year: int) -> tuple[date, date]:
     start_date = date(year, month, 1)
     if month == 12:
         if year == 9999:
-            raise ValueError("Invalid date range: December 9999 has no supported end date.")
+            raise ValueError(
+                "Invalid date range: December 9999 has no supported end date."
+            )
         end_date = date(year + 1, 1, 1)
     else:
         end_date = date(year, month + 1, 1)
@@ -121,7 +124,9 @@ def transaction_record(transaction: Any) -> dict[str, str | bool | None]:
     }
 
 
-def list_transactions(start_date: date, end_date: date) -> list[dict[str, str | bool | None]]:
+def list_transactions(
+    start_date: date, end_date: date
+) -> list[dict[str, str | bool | None]]:
     server_url, password, budget_id = load_configuration()
     with Actual(base_url=server_url, password=password) as actual:
         _ = actual.set_file(budget_id)

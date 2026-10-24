@@ -11,7 +11,6 @@ from collections.abc import Iterable
 from datetime import date
 from typing import Any
 
-from actual import Actual
 from actual.queries import (
     create_budget,
     get_budgets,
@@ -19,6 +18,8 @@ from actual.queries import (
     get_transactions,
 )
 from dotenv import load_dotenv
+
+from actual import Actual
 
 _ = load_dotenv()
 
@@ -31,7 +32,9 @@ if not (server_url and password and budget_id):
     raise SystemExit(1)
 
 
-def discover_budget_months(budgets: Iterable[Any], transactions: Iterable[Any]) -> list[int]:
+def discover_budget_months(
+    budgets: Iterable[Any], transactions: Iterable[Any]
+) -> list[int]:
     months_set: set[int] = set()
     for b in budgets:
         if b.month is not None:
@@ -54,7 +57,9 @@ def map_budget_data(budgets: Iterable[Any]) -> dict[tuple[int, str], tuple[int, 
     return budget_data
 
 
-def map_spent_by_category_and_month(transactions: Iterable[Any]) -> dict[tuple[int, str], int]:
+def map_spent_by_category_and_month(
+    transactions: Iterable[Any],
+) -> dict[tuple[int, str], int]:
     spent_map: dict[tuple[int, str], int] = {}
     for t in transactions:
         if t.tombstone or not t.category_id or t.date is None:
@@ -108,9 +113,13 @@ with Actual(base_url=server_url, password=password) as actual:
             new_budgeted_cents = -(carryover + spent)
             new_budgeted_units = new_budgeted_cents / 100.0
 
-            current_budgeted_cents, _current_carryover = budget_data.get((month_int, cat_obj.id), (0, 0))
+            current_budgeted_cents, _current_carryover = budget_data.get(
+                (month_int, cat_obj.id), (0, 0)
+            )
             if new_budgeted_cents != current_budgeted_cents:
-                _new_budget = create_budget(session, month_date, cat_obj, new_budgeted_units)
+                _new_budget = create_budget(
+                    session, month_date, cat_obj, new_budgeted_units
+                )
                 changes_in_month += 1
                 current_budgeted_units = current_budgeted_cents / 100.0
                 categories_changed.append(
@@ -133,7 +142,9 @@ with Actual(base_url=server_url, password=password) as actual:
 
             for idx, (cat_name, curr_str, new_str) in enumerate(formatted_items):
                 prefix = "   ├── " if idx < len(formatted_items) - 1 else "   └── "
-                print(f"{prefix}{cat_name:<{max_name_len}}  |  {curr_str:>{max_curr_len}} ──> {new_str:>{max_new_len}}")
+                print(
+                    f"{prefix}{cat_name:<{max_name_len}}  |  {curr_str:>{max_curr_len}} ──> {new_str:>{max_new_len}}"
+                )
 
             months_changed.add(month_int)
 
@@ -142,4 +153,6 @@ with Actual(base_url=server_url, password=password) as actual:
         actual.commit()
         _ = actual.sync()
     else:
-        print("\n✨ All category balances are already zeroed out. No changes were necessary.")
+        print(
+            "\n✨ All category balances are already zeroed out. No changes were necessary."
+        )

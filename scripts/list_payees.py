@@ -9,9 +9,10 @@
 import os
 import sys
 
-from actual import Actual
 from actual.queries import get_payees
 from dotenv import load_dotenv
+
+from actual import Actual
 
 _ = load_dotenv()
 
@@ -30,10 +31,13 @@ with Actual(base_url=server_url, password=password) as actual:
     print("BUDGET PAYEES:")
     payees = get_payees(actual.session)
     active_payees = [
-        payee for payee in payees
-        if not getattr(payee, "tombstone", False)
+        payee for payee in payees if not getattr(payee, "tombstone", False)
     ]
 
     for payee in sorted(active_payees, key=lambda p: p.name or ""):
-        transfer_info = f" (Transfer Account ID: {payee.transfer_acct})" if payee.transfer_acct else ""
+        transfer_info = (
+            f" (Transfer Account ID: {payee.transfer_acct})"
+            if payee.transfer_acct
+            else ""
+        )
         print(f"- {payee.name} (ID: {payee.id}){transfer_info}")

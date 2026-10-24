@@ -7,16 +7,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ExcelSettings(BaseSettings):
-    """Fields for reading and exporting credit card statements."""
-
     excel_skiprows: Annotated[int, Field(ge=0)] = 4
     excel_file: Annotated[str, Field(min_length=1)] = "data.xlsx"
     csv_file: Annotated[str, Field(min_length=1)] = "actual.csv"
+    categories_file: Annotated[str, Field(min_length=1)] = "categories.ini"
 
 
 class ActualSettings(BaseSettings):
-    """Fields for connecting to Actual Budget."""
-
     actual_server_url: Annotated[str, Field(min_length=1)]
     actual_budget_id: Annotated[str, Field(min_length=1)]
     actual_password_secret: Annotated[
@@ -30,8 +27,6 @@ class ActualSettings(BaseSettings):
 
 
 class PayslipSettings(BaseSettings):
-    """Fields for reading and decrypting payslips."""
-
     payslip_file: Annotated[str, Field(min_length=1)] = "payslip.pdf"
     payslip_password_secret: Annotated[
         SecretStr, Field(validation_alias="PAYSLIP_PASSWORD", repr=False)
@@ -43,8 +38,6 @@ class PayslipSettings(BaseSettings):
 
 
 class Settings(ExcelSettings, ActualSettings, PayslipSettings):
-    """Combined application settings and server configuration."""
-
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

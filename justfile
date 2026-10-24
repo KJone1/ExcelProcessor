@@ -59,7 +59,7 @@ lint:
     uv run basedpyright
     uv run mypy src scripts
     uv run flake8 --ignore=E501 src scripts
-    uv run pylint --disable=C0301,C0114,C0116 src scripts
+    uv run pylint --disable=C0301,C0114,C0115,C0116 src scripts
 
 [default]
 help:

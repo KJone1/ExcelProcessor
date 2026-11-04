@@ -168,7 +168,7 @@ function calculateFinancialScorecard(transactions, income) {
   const net = Math.round(income.net_to_bank * 100);
   let housing = 300000;
   const funCategories = new Set(["Eating out", "Social & Fun", "Vacation & Travel"]);
-  const utilityCategories = new Set(["Electricity", "ארנונה", "Water", "Utilities"]);
+  const utilityCategories = new Set(["Electricity", "Arnona", "Water", "Utilities"]);
   const utilityPayees = /electricity bill|arnona|bezeq|strauss water|חברת החשמל|חשמל לישראל|ארנונה|בזק|שטראוס מים/i;
   let essentials = 0;
   let fun = 0;

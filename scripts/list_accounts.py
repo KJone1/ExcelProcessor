@@ -4,14 +4,15 @@
 #   "python-dotenv>=1.2.1",
 # ]
 # ///
+# pylint: disable=duplicate-code
 
 import os
 import sys
 
-from actual.queries import get_accounts
 from dotenv import load_dotenv
 
 from actual import Actual
+from actual.queries import get_accounts
 
 _ = load_dotenv()
 
@@ -24,15 +25,13 @@ if not (server_url and password and budget_id):
     raise SystemExit(1)
 
 
-def balance(account):
-    return (
-        sum(
-            transaction.amount
-            for transaction in account.transactions
-            if not transaction.tombstone
-        )
-        / 100.0
+def balance(target_account):
+    total = sum(
+        transaction.amount
+        for transaction in target_account.transactions
+        if not transaction.tombstone
     )
+    return total / 100.0
 
 
 with Actual(base_url=server_url, password=password) as actual:
@@ -44,7 +43,7 @@ with Actual(base_url=server_url, password=password) as actual:
         account
         for account in accounts
         if not getattr(account, "closed", False)
-        and not getattr(account, "tombstone", False)
+        if not getattr(account, "tombstone", False)
     ]
 
     for header, is_offbudget in [

@@ -4,6 +4,7 @@
 #   "python-dotenv>=1.2.1",
 # ]
 # ///
+# pylint: disable=duplicate-code
 
 import os
 import sys
@@ -11,15 +12,15 @@ from collections.abc import Iterable
 from datetime import date
 from typing import Any
 
+from dotenv import load_dotenv
+
+from actual import Actual
 from actual.queries import (
     create_budget,
     get_budgets,
     get_categories,
     get_transactions,
 )
-from dotenv import load_dotenv
-
-from actual import Actual
 
 _ = load_dotenv()
 
@@ -33,14 +34,14 @@ if not (server_url and password and budget_id):
 
 
 def discover_budget_months(
-    budgets: Iterable[Any], transactions: Iterable[Any]
+    budget_items: Iterable[Any], transaction_items: Iterable[Any]
 ) -> list[int]:
     months_set: set[int] = set()
-    for b in budgets:
+    for b in budget_items:
         if b.month is not None:
             months_set.add(b.month)
 
-    for t in transactions:
+    for t in transaction_items:
         if not t.tombstone and t.date is not None:
             date_str = str(t.date).replace("-", "")
             if len(date_str) >= 6 and date_str[:6].isdigit():
@@ -49,27 +50,29 @@ def discover_budget_months(
     return sorted(months_set)
 
 
-def map_budget_data(budgets: Iterable[Any]) -> dict[tuple[int, str], tuple[int, int]]:
-    budget_data: dict[tuple[int, str], tuple[int, int]] = {}
-    for b in budgets:
+def map_budget_data(
+    budget_items: Iterable[Any],
+) -> dict[tuple[int, str], tuple[int, int]]:
+    mapped_budgets: dict[tuple[int, str], tuple[int, int]] = {}
+    for b in budget_items:
         if b.month is not None and b.category_id is not None:
-            budget_data[(b.month, b.category_id)] = (b.amount or 0, b.carryover or 0)
-    return budget_data
+            mapped_budgets[(b.month, b.category_id)] = (b.amount or 0, b.carryover or 0)
+    return mapped_budgets
 
 
 def map_spent_by_category_and_month(
-    transactions: Iterable[Any],
+    transaction_items: Iterable[Any],
 ) -> dict[tuple[int, str], int]:
-    spent_map: dict[tuple[int, str], int] = {}
-    for t in transactions:
+    mapped_spent: dict[tuple[int, str], int] = {}
+    for t in transaction_items:
         if t.tombstone or not t.category_id or t.date is None:
             continue
         date_str = str(t.date).replace("-", "")
         if len(date_str) >= 6 and date_str[:6].isdigit():
-            month_int = int(date_str[:6])
-            key = (month_int, t.category_id)
-            spent_map[key] = spent_map.get(key, 0) + (t.amount or 0)
-    return spent_map
+            tx_month = int(date_str[:6])
+            key = (tx_month, t.category_id)
+            mapped_spent[key] = mapped_spent.get(key, 0) + (t.amount or 0)
+    return mapped_spent
 
 
 with Actual(base_url=server_url, password=password) as actual:

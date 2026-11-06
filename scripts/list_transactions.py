@@ -13,10 +13,10 @@ from collections.abc import Sequence
 from datetime import UTC, date, datetime
 from typing import Any
 
-from actual.queries import get_transactions
 from dotenv import load_dotenv
 
 from actual import Actual
+from actual.queries import get_transactions
 
 USAGE = "Usage: uv run scripts/list_transactions.py <month> [year]"
 MONTHS = {

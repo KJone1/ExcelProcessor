@@ -9,10 +9,10 @@
 import os
 import sys
 
-from actual.queries import get_tags
 from dotenv import load_dotenv
 
 from actual import Actual
+from actual.queries import get_tags
 
 _ = load_dotenv()
 

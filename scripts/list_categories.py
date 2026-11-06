@@ -4,14 +4,15 @@
 #   "python-dotenv>=1.2.1",
 # ]
 # ///
+# pylint: disable=duplicate-code
 
 import os
 import sys
 
-from actual.queries import get_category_groups
 from dotenv import load_dotenv
 
 from actual import Actual
+from actual.queries import get_category_groups
 
 _ = load_dotenv()
 
@@ -33,7 +34,7 @@ with Actual(base_url=server_url, password=password) as actual:
         group
         for group in groups
         if not getattr(group, "tombstone", False)
-        and not getattr(group, "hidden", False)
+        if not getattr(group, "hidden", False)
     ]
 
     for group in sorted(
@@ -43,7 +44,7 @@ with Actual(base_url=server_url, password=password) as actual:
             category
             for category in getattr(group, "categories", [])
             if not getattr(category, "tombstone", False)
-            and not getattr(category, "hidden", False)
+            if not getattr(category, "hidden", False)
         ]
         if not categories:
             continue

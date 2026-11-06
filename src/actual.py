@@ -23,11 +23,15 @@ class ActualUploader:
             session = actual.session
 
             accounts = get_accounts(session)
-            account = next(a for a in accounts if a.name and "Poalim" in a.name)
+            account = next(
+                a for a in accounts if a.name and settings.actual_account_name in a.name
+            )
             print(f"Importing to account: {account.name}")
 
             categories = get_categories(session)
-            category = next(c for c in categories if c.name == "Income")
+            category = next(
+                c for c in categories if c.name == settings.actual_income_category
+            )
 
             # The transaction date is already calculated as the 1st of the next month in extract_payslip_date
             trans_date = payslip_data.date
@@ -70,7 +74,9 @@ class ActualUploader:
 
             # Get Account
             accounts = get_accounts(session)
-            account = next(a for a in accounts if a.name and "Poalim" in a.name)
+            account = next(
+                a for a in accounts if a.name and settings.actual_account_name in a.name
+            )
             print(f"Importing to account: {account.name}")
 
             # Get Categories map

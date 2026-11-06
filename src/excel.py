@@ -129,4 +129,4 @@ class ExcelProcessor:
             if res:
                 return res
 
-        return "Misc & One-offs"
+        return settings.default_category

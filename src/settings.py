@@ -11,11 +11,14 @@ class ExcelSettings(BaseSettings):
     excel_file: Annotated[str, Field(min_length=1)] = "data.xlsx"
     csv_file: Annotated[str, Field(min_length=1)] = "actual.csv"
     categories_file: Annotated[str, Field(min_length=1)] = "categories.ini"
+    default_category: Annotated[str, Field(min_length=1)] = "Misc & One-offs"
 
 
 class ActualSettings(BaseSettings):
     actual_server_url: Annotated[str, Field(min_length=1)]
     actual_budget_id: Annotated[str, Field(min_length=1)]
+    actual_account_name: Annotated[str, Field(min_length=1)] = "Poalim"
+    actual_income_category: Annotated[str, Field(min_length=1)] = "Income"
     actual_password_secret: Annotated[
         SecretStr,
         Field(validation_alias="ACTUAL_PASSWORD", min_length=1, repr=False),

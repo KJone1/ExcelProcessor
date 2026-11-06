@@ -2,6 +2,7 @@
 import re
 from dataclasses import dataclass
 from datetime import date
+from typing import ClassVar
 
 import pypdf
 
@@ -16,6 +17,16 @@ class PayslipData:
 
 
 class PayslipProcessor:
+    date_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"תלוש משכורת לחודש\n(\d{2}/\d{4})"
+    )
+    gross_pay_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"([\d,.]+)\nהכנסה חייבת"
+    )
+    net_pay_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"נטו לבנק([\d,.]+)"
+    )
+
     def __init__(self) -> None:
         self.reader: pypdf.PdfReader = pypdf.PdfReader(settings.payslip_file)
 
@@ -47,7 +58,7 @@ class PayslipProcessor:
                 _ = writer.write(f)
 
     def _extract_payslip_date(self, text: str) -> date:
-        match = re.search(r"תלוש משכורת לחודש\n(\d{2}/\d{4})", text)
+        match = self.date_pattern.search(text)
         if not match:
             raise ValueError("Could not find payslip date")
 
@@ -61,13 +72,13 @@ class PayslipProcessor:
         return date(next_year, next_month, 1)
 
     def _extract_gross_pay(self, text: str) -> float:
-        match = re.search(r"([\d,.]+)\nהכנסה חייבת", text)
+        match = self.gross_pay_pattern.search(text)
         if match:
             return float(match.group(1).replace(",", ""))
         raise ValueError("Could not find gross income")
 
     def _extract_net_pay(self, text: str) -> float:
-        match = re.search(r"נטו לבנק([\d,.]+)", text)
+        match = self.net_pay_pattern.search(text)
         if match:
             return float(match.group(1).replace(",", ""))
         raise ValueError("Could not find net income")
